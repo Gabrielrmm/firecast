@@ -113,6 +113,184 @@ end;
 
 --[[ Objeto TObject ]]--
 
+objs.class = {
+	addEventListener = function (obj, eventName, funcCallback, optionalSelfParameter)
+		return localObjs.addEventListener(obj, eventName, funcCallback, optionalSelfParameter);		
+	end,
+	
+	removeEventListener = function (obj, eventListenerId)
+		return localObjs.removeEventListenerById(eventListenerId);		
+	end,
+	
+	removeAllEventListeners = function(obj)
+		if (obj.handle == nil) then
+			return;
+		end;
+	
+		local eventsOfThis = localObjs.events.eventsOfObjects[obj.handle];
+		
+		if (eventsOfThis ~= nil) then
+			local eventsIds = {};
+			local idx = 1;
+		
+			for k, v in pairs(eventsOfThis) do
+				eventsIds[idx] = k;
+				idx = idx + 1;
+			end;
+			
+			for i = 1, idx - 1, 1 do
+				localObjs.removeEventListenerById(eventsIds[i]);
+			end;
+			
+			localObjs.events.eventsOfObjects[obj.handle] = nil;
+		end;	
+	end,
+	
+	destroy = function(obj)
+		if not obj._calledDestroy then
+			obj._calledDestroy = true;			
+		    					
+			if obj.handle ~= nil then	
+				if (obj.removeAllEventListeners ~= nil) then
+					obj:removeAllEventListeners();						
+				end;	
+					
+				objHandlers[obj.handle] = nil;			
+			
+				_obj_destruir(obj.handle);
+				obj.handle = nil;
+			end;	
+		end;
+	end,
+	
+	getClassName = function(obj)
+		if obj.handle ~= nil then
+			return _obj_getClassName(obj.handle);
+		else
+			return "";
+		end;	
+	end
+};
+
+objs.class.listen = objs.class.addEventListener;
+objs.class.unlisten = objs.class.removeEventListener;
+
+local function __readPropertyValue(instance, propKey)
+	local fgetter;
+	
+	if type(propKey.getter) == "function" then
+		fgetter = propKey.getter;
+	else
+		fgetter = instance[propKey.getter];
+	end;
+	
+	if fgetter ~= nil then
+		return fgetter(instance);
+	elseif propKey.readProp ~= nil then
+		return _obj_getProp(rawget(instance, 'handle'), propKey.readProp);
+	end;
+end;
+
+local function __tryIndexObjWithDefinition(definition, instance, key)
+	-- Raw Value
+	local v = rawget(definition, key);
+			
+	if (v ~= nil) then
+		return true, v;
+	end;
+
+	-- Property		
+	local props = rawget(definition, "props");			
+	
+	if props ~= nil then	
+		local propKey = props[key];
+		
+		if propKey ~= nil then
+			return true, __readPropertyValue(instance, propKey);
+		end;
+	end;	
+
+	-- Event		
+	local eves = rawget(definition, "eves");
+	
+	if eves ~= nil then
+		local eveKey = eves[key];
+		
+		if eveKey ~= nil then
+			-- Existe um evento com este nome.. Vamos retornar o evento principal associado, se existir.
+			local mainEves = rawget(instance, "__mainEves");
+			
+			if mainEves ~= nil then
+				return true, mainEves[key];
+			end;
+		end;
+	end;	
+end;
+
+local function __tryNewIndexObjWithDefinition(definition, instance, key, value)
+	-- Tentar setar uma propriedade
+	local fsetter = nil;		
+	local props = rawget(definition, "props");	
+	
+	if props ~= nil then		
+		local propKey = props[key];
+		
+		if propKey ~= nil then
+			if type(propKey.setter) == "function" then
+				fsetter = propKey.setter;
+			else
+				fsetter = instance[propKey.setter];
+			end;
+			
+			if (fsetter == nil) and (propKey.writeProp ~= nil) then
+				_obj_setProp(rawget(instance, 'handle'), propKey.writeProp, value);
+				return true;
+			end;
+		end;		
+	end;
+	
+	if fsetter ~= nil then
+		fsetter(instance, value);
+		return true;
+	end;
+		
+	-- Tentar setar um evento	
+	local eves = rawget(definition, "eves");
+	
+	if eves ~= nil then
+		local eveKey = eves[key];
+		
+		if eveKey ~= nil then
+			-- Existe um evento com este nome.. Vamos setar o evento principal associado, se existir.
+			local mainEves = rawget(instance, "__mainEves");
+			
+			if (mainEves == nil) then
+				mainEves = {};
+				rawset(instance, "__mainEves", mainEves)
+			end;
+			
+			local oldListenerId = mainEves["id_" .. key];
+			
+			if oldListenerId ~= nil then
+				objs.removeEventListenerById(oldListenerId);
+				mainEves["id_" .. key] = nil;
+			end;
+			
+			mainEves[key] = value;
+			
+			if value ~= nil then
+				mainEves[key] = value;
+				mainEves["id_" .. key] = objs.addEventListener(instance, key, value);
+			end;
+			
+			return true;
+		end;
+	end;	
+	
+	-- Could not newindex object with supplied definition
+	return false;
+end;
+
 local objectMetaTable = {
 	--[[ Comparação padrão entre objetos ]]--
 	__eq = function(op1, op2)
@@ -134,118 +312,54 @@ local objectMetaTable = {
 	--[[ getter padrão de propriedades dos objetos. Chamado quando tentar gettar uma propriedade que não existe ]]--
 	
 	__index = function(table, key)
-		local v = rawget(table, key);
+		local r, v;
 		
-		if (v ~= nil) then
+		r, v = __tryIndexObjWithDefinition(table, table, key);
+		
+		if r then
 			return v;
 		end;
-	
-		-- Tentalizar localizar uma propriedade com este nome
-		local props = rawget(table, "props");
+
+		-- Verificar classes		
+		local currentClass = rawget(table, "class");	
 		
-		if props ~= nil then
-			local propKey = props[key];
+		while currentClass ~= nil do
+			r, v = __tryIndexObjWithDefinition(currentClass, table, key);
 			
-			if propKey ~= nil then
-				local fgetter;
-				
-				if type(propKey.getter) == "function" then
-					fgetter = propKey.getter;
-				else
-					fgetter = rawget(table, propKey.getter);
-				end;
-				
-				if fgetter ~= nil then
-					return fgetter(table);
-				elseif propKey.readProp ~= nil then
-					return _obj_getProp(rawget(table, 'handle'), propKey.readProp);
-				end;
-			end	
-		end;	
+			if r then
+				return v;
+			end;	
 		
-		-- Tentar localizar um evento principal com este nome
-		local eves = rawget(table, "eves");
-		
-		if eves ~= nil then
-			local eveKey = eves[key];
-			
-			if eveKey ~= nil then
-				-- Existe um evento com este nome.. Vamos retornar o evento principal associado, se existir.
-				local mainEves = rawget(table, "__mainEves");
-				
-				if mainEves ~= nil then
-					return mainEves[key];
-				end;
-			end;
+			currentClass = currentClass.super;
 		end;
-		
+						
 		-- Se chegou até aqui, é porque não localizou nenhum valor especial
 		return nil;
 	end,
 	
 	--[[ setter padrão de propriedades dos objetos. Chamado quando tentou settar uma propriedade que não existe ]]--
 	
-	__newindex = function(table, key, value)
-		local fsetter = nil;
-		local props = rawget(table, "props");
+	__newindex = function(table, key, value)	
+		local r;
+		r = __tryNewIndexObjWithDefinition(table, table, key, value);
 		
-		-- Tentar setar uma propriedade
-		if props ~= nil then		
-			local propKey = props[key];
-			
-			if propKey ~= nil then
-				if type(propKey.setter) == "function" then
-					fsetter = propKey.setter;
-				else
-					fsetter = rawget(table, propKey.setter);								
-				end;
-				
-				if (fsetter == nil) and (propKey.writeProp ~= nil) then
-					return _obj_setProp(rawget(table, 'handle'), propKey.writeProp, value);
-				end;
-			end;		
-		end;
-		
-		if fsetter ~= nil then
-			fsetter(table, value);
+		if r then
 			return;
 		end;
 		
-		-- Tentar setar um evento	
-		if (value == nil) or (type(value) == "function") then
-			local eves = rawget(table, "eves");
-			
-			if eves ~= nil then
-				local eveKey = eves[key];
-				
-				if eveKey ~= nil then
-					-- Existe um evento com este nome.. Vamos setar o evento principal associado, se existir.
-					local mainEves = rawget(table, "__mainEves");
-					
-					if (mainEves == nil) then
-						mainEves = {};
-						rawset(table, "__mainEves", mainEves)
-					end;
-					
-					local oldListenerId = mainEves["id_" .. key];
-					
-					if oldListenerId ~= nil then
-						objs.removeEventListenerById(oldListenerId);
-						mainEves["id_" .. key] = nil;
-					end;
-					
-					mainEves[key] = value;
-					
-					if value ~= nil then
-						mainEves[key] = value;
-						mainEves["id_" .. key] = objs.addEventListener(table, key, value);
-					end;
-					
-					return;
-				end;
-			end;	
-		end;
+		-- Verificar classes		
+		local currentClass = rawget(table, "class");	
 		
+		while currentClass ~= nil do
+			r = __tryNewIndexObjWithDefinition(currentClass, table, key, value);
+			
+			if r then
+				return;
+			end;	
+		
+			currentClass = currentClass.super;
+		end;
+					
 		-- Se chegou até aqui, é porque não conseguiu fazer nenhuma atribuição especial.
 		-- Vamos fazer uma atribuição padrão
 		rawset(table, key, value);
@@ -261,80 +375,38 @@ local objectMetaTable = {
 			obj.handle = nil;		
 		end;			
 	end
-}
+};
 
 function objs.objectFromHandle(handle)
-	local obj = {_calledDestroy = false};
-	obj.handle = handle;
-	
+	local obj = {handle=handle,
+				 class=objs.class};		
+				 
 	setmetatable(obj, objectMetaTable);	
-	
-	function obj:addEventListener(eventName, funcCallback, optionalSelfParameter)
-		return localObjs.addEventListener(obj, eventName, funcCallback, optionalSelfParameter);		
-	end;
-	
-	obj.listen = obj.addEventListener;
-	
-	function obj:removeEventListener(eventListenerId)
-		return localObjs.removeEventListenerById(eventListenerId);		
-	end;	
-	
-	obj.unlisten = obj.removeEventListener;
-	
-	function obj:removeAllEventListeners()		
-		if (self.handle == nil) then
-			return;
-		end;
-	
-		local eventsOfThis = localObjs.events.eventsOfObjects[self.handle];
-		
-		if (eventsOfThis ~= nil) then
-			local eventsIds = {};
-			local idx = 1;
-		
-			for k, v in pairs(eventsOfThis) do
-				eventsIds[idx] = k;
-				idx = idx + 1;
-			end;
-			
-			for i = 1, idx - 1, 1 do
-				localObjs.removeEventListenerById(eventsIds[i]);
-			end;
-			
-			localObjs.events.eventsOfObjects[self.handle] = nil;
-		end;		
-	end;
-	
-	function obj:destroy() 
-		if (not self._calledDestroy) then
-			self._calledDestroy = true;			
-		    					
-			if self.handle ~= nil then	
-				if (self.removeAllEventListeners ~= nil) then
-					self:removeAllEventListeners();						
-				end;	
-					
-				objHandlers[self.handle] = nil;			
-			
-				_obj_destruir(self.handle);
-				self.handle = nil;
-			end;	
-		end
-	end	
-	
-	function obj:getClassName()
-		if self.handle ~= nil then
-			return _obj_getClassName(self.handle);
-		else
-			return "";
-		end;
-	end;
-	
 	return obj;
 end
 
 function objs.newPureLuaObject()
 	return objs.objectFromHandle(nil);
+end;
+
+function objs.__createSubclass(superClass)
+	assert(superClass ~= nil);	
+	local class = {super = superClass, props = {}, eves = {}};		
+	
+	class.fromHandle = function(handle)
+		local obj = {handle=handle,
+					 class=class};		
+					 
+		setmetatable(obj, objectMetaTable);	
+		return obj;		
+	end;
+	
+	class.inherit = function() return objs.__createSubclass(class); end;	
+	return class;	
+end;
+
+function objs.inherit()
+	return objs.__createSubclass(objs.class);
 end;
 
 function objs.componentFromHandle(handle)

@@ -3,6 +3,8 @@ local ndb = require("ndb.lua");
 local System = require("system.lua");
 local Async = require("async.lua");
 
+local __delayedGridLib = nil;
+
 gui = objs.objectFromHandle(_obj_newObject("TLuaGUIServices"));
 GUI = gui;
 
@@ -117,6 +119,22 @@ local function controlFromHandle(handle)
 	function ctrl:setEffectParam4(param) _obj_setProp(self.handle, "CompEffectParam4", param); end;	
 			
 	function ctrl:findControlByName(controlName) return gui.findControlByName(controlName, self); end;
+	
+	function ctrl:getGrid()
+		local cachedGrid = rawget(self, "__cachedGrid");
+		
+		if cachedGrid == nil then
+			if __delayedGridLib == nil then
+				__delayedGridLib = require("rrpgGUI_grid.dlua");
+				assert(__delayedGridLib ~= nil);
+			end;
+			
+			cachedGrid = __delayedGridLib.new(self);						
+			rawset(self, "__cachedGrid", cachedGrid);
+		end;
+		
+		return cachedGrid;
+	end
 		
 	if ctrl.props == nil then
 		ctrl.props = {};
@@ -157,8 +175,10 @@ local function controlFromHandle(handle)
 								    'sizeNWSE', 'sizeWE', 'upArrow',
 								    'drag', 'noDrop', 'hSplit', 'vSplit',
 								    'multiDrag', 'sqlWait', 'no', 'appStart',
-								    'help', 'cross'}};				
+								    'help', 'cross'}};	
+									
 	ctrl.props["hint"] = {setter = "setHint", getter = "getHint", tipo="string"};
+	ctrl.props["grid"] = {getter = "getGrid", tipo="table"};
 	
 	if ctrl.eves == nil then
 		ctrl.eves = {};
