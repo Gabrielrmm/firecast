@@ -3,12 +3,7 @@ local ndb = require("ndb.lua");
 local System = require("system.lua");
 local Async = require("async.lua");
 
-if System.checkAPIVersion(87, 4) then
-	gui = objs.objectFromHandle(_obj_newObject("TLuaGUIServices"));
-else
-	gui = {};
-end
-
+gui = objs.objectFromHandle(_obj_newObject("TLuaGUIServices"));
 GUI = gui;
 
 local guiLoaders = {};
@@ -1315,29 +1310,27 @@ local function recordListFromHandle(handle)
 	function ctrl:scrollToNode(node) _gui_recordListScrollToNodeHandle(self.handle, ndb.getNodeHandle(node)); end;
 	function ctrl:sort() _obj_invoke(self.handle, "ReorganizarItens"); end;
 	
-	if System.checkAPIVersion(87, 1) then
-		function ctrl:getChildren()
-			local ret = {};
-			local childCount = _obj_getProp(self.handle, "ChildFormCount");
-			local child;
-			local childHandle;
-			local idxDest = 1;
-				
-			for i = 0, childCount - 1, 1 do
-				childHandle = _gui_rcl_getChild(self.handle, i);
-				
-				if (childHandle ~= nil) then							
-					child = gui.fromHandle(childHandle);
-					
-					if (type(child) == "table") then							
-						ret[idxDest] = child;
-						idxDest = idxDest + 1;
-					end
-				end;	
-			end
+	function ctrl:getChildren()
+		local ret = {};
+		local childCount = _obj_getProp(self.handle, "ChildFormCount");
+		local child;
+		local childHandle;
+		local idxDest = 1;
 			
-			return ret;
-		end;
+		for i = 0, childCount - 1, 1 do
+			childHandle = _gui_rcl_getChild(self.handle, i);
+			
+			if (childHandle ~= nil) then							
+				child = gui.fromHandle(childHandle);
+				
+				if (type(child) == "table") then							
+					ret[idxDest] = child;
+					idxDest = idxDest + 1;
+				end
+			end;	
+		end
+		
+		return ret;
 	end;
 	
 	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
@@ -2015,31 +2008,16 @@ function gui.openInBrowser(url)
 end;
 
 function gui.asyncOpenFirecastURI(uri, params)
-	if System.checkAPIVersion(87, 4) then
-		local promiseHandle = _obj_invokeEx(gui.handle, "AsyncOpenFirecastURI", uri, params);
-		return Async.Promise.wrap(promiseHandle);
-	else
-		return Async.Promise.failed("No API Support");
-	end;
+	local promiseHandle = _obj_invokeEx(gui.handle, "AsyncOpenFirecastURI", uri, params);
+	return Async.Promise.wrap(promiseHandle);
 end;
 
 function gui.toast(message)
-	if System.checkAPIVersion(87, 2)  then
-		return _gui_toast(message);
-	else	
-		require('dialogs.lua').showMessage(message);
-	end;
+	return _gui_toast(message);
 end;
 
 function gui.getShiftState()
-	if System.checkAPIVersion(87, 4) then
-		return _gui_getShiftState();
-	else	
-		return {shiftKey = false,
-				ctrlKey = false,
-				altKey = false,
-				cmdKey = false};
-	end;
+	return _gui_getShiftState();
 end;
 
 return gui;
