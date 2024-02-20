@@ -15,7 +15,7 @@ function Grid.shouldUseScreenSizeStr(value)
 	return (value ~= nil) and (type(value) == "string") and VALID_SCREEN_SIZE_STR_DICT[value];
 end;
 
-function __registerScreenSizePropFor_specificScreenSize(screenSize, luaPropName, outerGetter, outerSetter, tipo)
+function __registerScreenSizePropFor_specificScreenSize(screenSize, details, outerGetter, outerSetter)
 	local wrappedSetter = 
 		function(instance, value)
 			return outerSetter(instance, screenSize, value);
@@ -26,20 +26,29 @@ function __registerScreenSizePropFor_specificScreenSize(screenSize, luaPropName,
 			return outerGetter(instance, screenSize);
 		end;
 
-	local propDetais = {getter=wrappedGetter, setter=wrappedSetter, tipo=tipo};
+	local propDetais = {getter=wrappedGetter, setter=wrappedSetter, tipo=details.tipo, values=details.values};
 	
 	if screenSize ~= nil then
-		Grid.props[luaPropName .. "-" .. screenSize] = propDetais;
-		Grid.props[luaPropName .. "_" .. screenSize] = propDetais;
+		if details.lfmName ~= nil then
+			Grid.props[details.lfmName .. "-" .. screenSize] = propDetais;
+		else
+			Grid.props[details.luaName .. "-" .. screenSize] = propDetais;
+		end;
+	
+		Grid.props[details.luaName .. "_" .. screenSize] = propDetais;
 	else
-		Grid.props[luaPropName] = propDetais;
+		Grid.props[details.luaName] = propDetais;
+		
+		if details.lfmName ~= nil then
+			Grid.props[details.lfmName] = propDetais;
+		end;
 	end;
 end;
 
-local function __registerScreenSizeProp(luaPropName, hostPropName, tipo)
-	local hostSetterMethodName = "Set" .. hostPropName;
-	local hostGetterMethodName = "Get" .. hostPropName;
-	local luaFirstLetterUpperCasePropName = luaPropName:gsub("^%l", string.upper);
+local function __registerScreenSizeProp(details)
+	local hostSetterMethodName = "Set" .. details.hostName;
+	local hostGetterMethodName = "Get" .. details.hostName;
+	local luaFirstLetterUpperCasePropName = details.luaName:gsub("^%l", string.upper);
 
 	local setter = 
 		function (instance, screenSizeOrValue, value)
@@ -70,10 +79,43 @@ local function __registerScreenSizeProp(luaPropName, hostPropName, tipo)
 	Grid["set" .. luaFirstLetterUpperCasePropName] = setter;
 	Grid["get" .. luaFirstLetterUpperCasePropName] = getter;
 
-	__registerScreenSizePropFor_specificScreenSize(nil, luaPropName, getter, setter, tipo)
+	__registerScreenSizePropFor_specificScreenSize(nil, details, getter, setter)
 
 	for i = 1, #SCREEN_SIZES_ARRAY do
-		__registerScreenSizePropFor_specificScreenSize(SCREEN_SIZES_ARRAY[i], luaPropName, getter, setter, tipo);
+		__registerScreenSizePropFor_specificScreenSize(SCREEN_SIZES_ARRAY[i], details, getter, setter);
+	end;
+end;
+
+local function __registerNonScreenSizeProp(details)
+	local hostPropertyNamme = details.hostName;	
+	local luaFirstLetterUpperCasePropName = details.luaName:gsub("^%l", string.upper);
+	local useDefaultValue = details.useDefaultValue;
+	local defaultValue = details.defaultValue;
+
+	local setter = 
+		function (instance, value)
+			if (value == nil) and useDefaultValue then		
+				_obj_setProp(instance.handle, hostPropertyNamme, defaultValue);
+			else
+				_obj_setProp(instance.handle, hostPropertyNamme, value);
+			end;
+					
+			return instance;
+		end;
+		
+	local getter = 
+		function (instance)
+			return _obj_getProp(instance.handle, hostPropertyNamme);
+		end;		
+		
+	Grid["set" .. luaFirstLetterUpperCasePropName] = setter;
+	Grid["get" .. luaFirstLetterUpperCasePropName] = getter;
+	
+	local propDetais = {getter=getter, setter=setter, tipo=details.tipo, values=details.values};
+	Grid.props[details.luaName] = propDetais;
+	
+	if details.lfmName ~= nil then
+		Grid.props[details.lfmName] = propDetais;
 	end;
 end;
 
@@ -87,23 +129,19 @@ function Grid:reset()
 	return self;
 end;
 
-function Grid:setRole(role)
-	_obj_setProp(self.handle, "Role", role);
-	return self;
-end;
+__registerNonScreenSizeProp({luaName="role", hostName="Role", tipo="enum", values={"none", "row", "col", "inlineBlock", "container"}});
+__registerNonScreenSizeProp({luaName="root", hostName="Root", tipo="bool", useDefaultValue=true, defaultValue=true});
+__registerNonScreenSizeProp({luaName="screenSizeDeterminator", lfmName="screen-size-determinator", hostName="ScreenSizeDeterminator", tipo="bool", useDefaultValue=true, defaultValue=true});
 
-Grid.props["role"] = {readProp="Role", setter="setRole", tipo="enum", values={"none", "row", "col", "inlineBlock", "container"}};
-
-__registerScreenSizeProp("width", "Width", "int");
+__registerScreenSizeProp({luaName="width", hostName="Width", tipo="int"});
+__registerScreenSizeProp({luaName="cntVertAlign", lfmName="cnt-vert-align", hostName="CntVertAlign", tipo="enum", values={"top", "center", "middle", "bottom"}});
 
 -- Instance
 
 function Grid.new(ctrl)
 	assert(ctrl ~= nil);
 	
-	local g = Grid.fromHandle(_obj_newObject("TLuaGridControl", ctrl.handle));
-	g.__ctrl = ctrl;	
-		
+	local g = Grid.fromHandle(_obj_newObject("TLuaGridControl", ctrl.handle));		
 	return g;
 end;
 

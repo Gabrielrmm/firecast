@@ -16,7 +16,7 @@ gui.guiLoaders = guiLoaders;
 --[[ Objeto Control ]]--
 gui.Control = objs.HierarchyObject.inherit();
 
-function gui.Control:constructor(...) 	
+function gui.Control:initialize() 	
 	if self.props == nil then
 		self.props = {};
 	end;
@@ -211,18 +211,19 @@ end
 gui.controlFromHandle = controlFromHandle;
 
 --[[ Objeto Layout ]]--
+gui.Layout = gui.Control.inherit();
+
+function gui.Layout:getFrameStyle() return _obj_getProp(self.handle, "FrameStyle"); end;
+function gui.Layout:setFrameStyle(frameStyle) _obj_setProp(self.handle, "FrameStyle", frameStyle) end;		
+
+function gui.Layout:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
+function gui.Layout:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;	
+
+gui.Layout.props["frameStyle"] = {setter = "setFrameStyle", getter = "getFrameStyle", tipo = "url"};		
+gui.Layout.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};	
 
 local function layoutFromHandle(handle)
-	local layout = controlFromHandle(handle);
-	
-	function layout:getFrameStyle() return _obj_getProp(self.handle, "FrameStyle"); end;
-	function layout:setFrameStyle(frameStyle) _obj_setProp(self.handle, "FrameStyle", frameStyle) end;		
-	
-	function layout:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
-	function layout:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;			
-	
-	layout.props["frameStyle"] = {setter = "setFrameStyle", getter = "getFrameStyle", tipo = "url"};		
-	layout.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};				
+	local layout = gui.Layout.fromHandle(handle);				
 	return layout;	
 end
 
@@ -321,81 +322,84 @@ local function __unlockFormWithActivity(form)
 	end;
 end;
 
-local function formLayoutFromHandle(handle)
-	local ctrl = layoutFromHandle(handle);
-	
-	rawset(ctrl, "__isFormFlag", true);
-	
-	function ctrl:getWidth() return _obj_getProp(self.handle, "FormWidth"); end;
-	function ctrl:setWidth(v) _obj_setProp(self.handle, "FormWidth", v); end;
-	
-	function ctrl:getHeight() return _obj_getProp(self.handle, "FormHeight"); end;
-	function ctrl:setHeight(v) _obj_setProp(self.handle, "FormHeight", v); end;
+gui.Form = gui.Layout.inherit();
 
-	function ctrl:getLeft() return _obj_getProp(self.handle, "FormLeft"); end;
-	function ctrl:setLeft(v) _obj_setProp(self.handle, "FormLeft", v); end;
+function gui.Form:initialize()
+	rawset(self, "__isFormFlag", true);
+end;
+
+function gui.Form:getWidth() return _obj_getProp(self.handle, "FormWidth"); end;
+function gui.Form:setWidth(v) _obj_setProp(self.handle, "FormWidth", v); end;
+
+function gui.Form:getHeight() return _obj_getProp(self.handle, "FormHeight"); end;
+function gui.Form:setHeight(v) _obj_setProp(self.handle, "FormHeight", v); end;
+
+function gui.Form:getLeft() return _obj_getProp(self.handle, "FormLeft"); end;
+function gui.Form:setLeft(v) _obj_setProp(self.handle, "FormLeft", v); end;
+
+function gui.Form:getTop() return _obj_getProp(self.handle, "FormTop"); end;
+function gui.Form:setTop(v) _obj_setProp(self.handle, "FormTop", v); end;	
 	
-	function ctrl:getTop() return _obj_getProp(self.handle, "FormTop"); end;
-	function ctrl:setTop(v) _obj_setProp(self.handle, "FormTop", v); end;	
-		
-	function ctrl:getTitle() return _obj_getProp(self.handle, "Title"); end;
-	function ctrl:setTitle(title) _obj_setProp(self.handle, "Title", title) end;
+function gui.Form:getTitle() return _obj_getProp(self.handle, "Title"); end;
+function gui.Form:setTitle(title) _obj_setProp(self.handle, "Title", title) end;
+
+function gui.Form:getDescription() return _obj_getProp(self.handle, "Description"); end;
+function gui.Form:setDescription(desc) _obj_setProp(self.handle, "Description", desc) end;	
+
+function gui.Form:getDataType() return _obj_getProp(self.handle, "DataType"); end;
+function gui.Form:setDataType(dataType) _obj_setProp(self.handle, "DataType", dataType) end;	
+
+function gui.Form:getFormType() return _obj_getProp(self.handle, "FormType"); end;
+function gui.Form:setFormType(formType) _obj_setProp(self.handle, "FormType", formType) end;		
+
+function gui.Form:getTheme() return _obj_getProp(self.handle, "Theme"); end;
+function gui.Form:setTheme(theme) _obj_setProp(self.handle, "Theme", theme) end;	
 	
-	function ctrl:getDescription() return _obj_getProp(self.handle, "Description"); end;
-	function ctrl:setDescription(desc) _obj_setProp(self.handle, "Description", desc) end;	
+function gui.Form:getLockWhileNodeIsLoading() return _obj_getProp(self.handle, "LockWhileNodeIsLoading"); end;
+function gui.Form:setLockWhileNodeIsLoading(v) _obj_setProp(self.handle, "LockWhileNodeIsLoading", v) end;		
+
+function gui.Form:getMinWidth() return _obj_getProp(self.handle, "MinWidth"); end;
+function gui.Form:setMinWidth(v) _obj_setProp(self.handle, "MinWidth", v) end;		
+
+function gui.Form:getMaxWidth() return _obj_getProp(self.handle, "MaxWidth"); end;
+function gui.Form:setMaxWidth(v) _obj_setProp(self.handle, "MaxWidth", v) end;		
 	
-	function ctrl:getDataType() return _obj_getProp(self.handle, "DataType"); end;
-	function ctrl:setDataType(dataType) _obj_setProp(self.handle, "DataType", dataType) end;	
+function gui.Form:setNodeObject(nodeObject) 
+	rawset(self, "nodeObject", nodeObject);
+	_gui_assignNodeObject(self.handle, ndb.getNodeHandle(nodeObject));
+end;
+
+function gui.Form:getNodeObject() return rawget(self, "nodeObject") end;
+function gui.Form:getNode() return self:getNodeObject(); end;
+function gui.Form:setNode(node) self:setNodeObject(node); end;
+function gui.Form:getScopeNode() return self:getNodeObject(); end;
+function gui.Form:setScopeNode(node) self:setNodeObject(node); end;	
+
+function gui.Form:lockWithActivity(msg) return __lockFormWithActivity(self, msg); end;	
+function gui.Form:unlockWithActivity() return __unlockFormWithActivity(self); end;	
 	
-	function ctrl:getFormType() return _obj_getProp(self.handle, "FormType"); end;
-	function ctrl:setFormType(formType) _obj_setProp(self.handle, "FormType", formType) end;		
-	
-	function ctrl:getTheme() return _obj_getProp(self.handle, "Theme"); end;
-	function ctrl:setTheme(theme) _obj_setProp(self.handle, "Theme", theme) end;	
-		
-	function ctrl:getLockWhileNodeIsLoading() return _obj_getProp(self.handle, "LockWhileNodeIsLoading"); end;
-	function ctrl:setLockWhileNodeIsLoading(v) _obj_setProp(self.handle, "LockWhileNodeIsLoading", v) end;		
-	
-	function ctrl:getMinWidth() return _obj_getProp(self.handle, "MinWidth"); end;
-	function ctrl:setMinWidth(v) _obj_setProp(self.handle, "MinWidth", v) end;		
-	
-	function ctrl:getMaxWidth() return _obj_getProp(self.handle, "MaxWidth"); end;
-	function ctrl:setMaxWidth(v) _obj_setProp(self.handle, "MaxWidth", v) end;		
-		
-	function ctrl:setNodeObject(nodeObject) 
-		rawset(self, "nodeObject", nodeObject);
-		_gui_assignNodeObject(self.handle, ndb.getNodeHandle(nodeObject));
-	end;
-	
-	function ctrl:getNodeObject() return rawget(self, "nodeObject") end;
-	
-	function ctrl:getNode() return self:getNodeObject(); end;
-	function ctrl:setNode(node) self:setNodeObject(node); end;
-	function ctrl:getScopeNode() return self:getNodeObject(); end;
-	function ctrl:setScopeNode(node) self:setNodeObject(node); end;	
-	
-	function ctrl:lockWithActivity(msg) return __lockFormWithActivity(self, msg); end;	
-	function ctrl:unlockWithActivity() return __unlockFormWithActivity(self); end;	
-	
-	ctrl.props["title"] = {setter = "setTitle", getter = "getTitle", tipo = "string"};
-	ctrl.props["description"] = {setter = "setDescription", getter = "getDescription", tipo = "string"};	
-	ctrl.props["dataType"] = {setter = "setDataType", getter = "getDataType", tipo = "string"};
-	ctrl.props["formType"] = {setter = "setFormType", getter = "getDataType", tipo = "enum",
-							  values = {"undefined", "sheetTemplate", "tablesDock"}};
-	ctrl.props["theme"] = {setter = "setTheme", getter = "getTheme", tipo = "enum", 
-						   values = {"default", "light", "dark"}};
-	ctrl.props["lockWhileNodeIsLoading"] = {setter = "setLockWhileNodeIsLoading", getter = "getLockWhileNodeIsLoading", tipo = "bool"};						   
-	ctrl.props["scopeNode"] = {setter = "setScopeNode", getter = "getScopeNode", tipo = "table"};						   	
-	ctrl.props["minWidth"] = {setter = "setMinWidth", getter = "getMinWidth", tipo = "double"};	
-	ctrl.props["maxWidth"] = {setter = "setMaxWidth", getter = "getMaxWidth", tipo = "double"};		
-	ctrl.props["isShowing"] = {readProp = "IsShowing", tipo = "bool"};			
-	
-	ctrl.eves["onScopeNodeChanged"] = "";	
-	ctrl.eves["onShow"] = "";
-	ctrl.eves["onHide"] = "";
-	ctrl.eves["onNodeReady"] = "";
-	ctrl.eves["onNodeUnready"] = "";
-	ctrl.eves["onNodeChanged"] = "";		
+gui.Form.props["title"] = {setter = "setTitle", getter = "getTitle", tipo = "string"};
+gui.Form.props["description"] = {setter = "setDescription", getter = "getDescription", tipo = "string"};	
+gui.Form.props["dataType"] = {setter = "setDataType", getter = "getDataType", tipo = "string"};
+gui.Form.props["formType"] = {setter = "setFormType", getter = "getDataType", tipo = "enum",
+						  values = {"undefined", "sheetTemplate", "tablesDock"}};
+gui.Form.props["theme"] = {setter = "setTheme", getter = "getTheme", tipo = "enum", 
+					   values = {"default", "light", "dark"}};
+gui.Form.props["lockWhileNodeIsLoading"] = {setter = "setLockWhileNodeIsLoading", getter = "getLockWhileNodeIsLoading", tipo = "bool"};						   
+gui.Form.props["scopeNode"] = {setter = "setScopeNode", getter = "getScopeNode", tipo = "table"};						   	
+gui.Form.props["minWidth"] = {setter = "setMinWidth", getter = "getMinWidth", tipo = "double"};	
+gui.Form.props["maxWidth"] = {setter = "setMaxWidth", getter = "getMaxWidth", tipo = "double"};		
+gui.Form.props["isShowing"] = {readProp = "IsShowing", tipo = "bool"};			
+
+gui.Form.eves["onScopeNodeChanged"] = "";	
+gui.Form.eves["onShow"] = "";
+gui.Form.eves["onHide"] = "";
+gui.Form.eves["onNodeReady"] = "";
+gui.Form.eves["onNodeUnready"] = "";
+gui.Form.eves["onNodeChanged"] = "";	
+
+local function formLayoutFromHandle(handle)
+	local ctrl = gui.Form.fromHandle(handle);			
 	return ctrl;	
 end
 
@@ -559,9 +563,6 @@ end;
 
 guiLoaders["flowLineBreak"] = flowLineBreakFromHandle;
 
-
---[[ Objeto Form Layout ]]--
-
 --[[ Text Controls]]--
 
 local function _addFontPropertiesToObject(ctrl)
@@ -625,21 +626,22 @@ local function _addEditablePropsToObject(ctrl)
 	return ctrl;
 end
 
+gui.TextControl = gui.Control.inherit();
+_addFontPropertiesToObject(gui.TextControl);
+_addTextStylePropsToObject(gui.TextControl);
+
+function gui.TextControl:getText() return _obj_getProp(self.handle, "Text"); end;
+function gui.TextControl:setText(text) return _obj_setProp(self.handle, "Text", text); end;
+
+function gui.TextControl:getStyledSettings() return _obj_getProp(self.handle, "StyledSettings"); end;
+function gui.TextControl:setStyledSettings(settings) return _obj_setProp(self.handle, "StyledSettings", settings); end;					
+
+gui.TextControl.props["text"] = {setter = "setText", getter = "getText", tipo = "string"};
+gui.TextControl.props["styledSettings"] = {setter = "setStyledSettings", getter = "getStyledSettings", tipo="set",
+										   values = {"family", "size", "style", "fontcolor", "other"}};
+
 local function textControlFromHandle(handle)
-	local ctrl = controlFromHandle(handle);	
-	ctrl = _addFontPropertiesToObject(ctrl);
-	ctrl = _addTextStylePropsToObject(ctrl);
-	
-	function ctrl:getText() return _obj_getProp(self.handle, "Text"); end;
-	function ctrl:setText(text) return _obj_setProp(self.handle, "Text", text); end;
-	
-	function ctrl:getStyledSettings() return _obj_getProp(self.handle, "StyledSettings"); end;
-	function ctrl:setStyledSettings(settings) return _obj_setProp(self.handle, "StyledSettings", settings); end;	
-				
-	ctrl.props["text"] = {setter = "setText", getter = "getText", tipo = "string"};
-	ctrl.props["styledSettings"] = {setter = "setStyledSettings", getter = "getStyledSettings", tipo="set",
-									values = {"family", "size", "style", "fontcolor", "other"}};
-		
+	local ctrl = gui.TextControl.fromHandle(handle);		
 	return ctrl;	
 end
 
@@ -658,23 +660,25 @@ guiLoaders["button"] = buttonFromHandle;
 
 --[[ Objeto Label ]]--
 
+gui.Label = gui.TextControl.inherit();
+
+function gui.Label:getAutoSize() return _obj_getProp(self.handle, "AutoSize"); end;
+function gui.Label:setAutoSize(v) _obj_setProp(self.handle, "AutoSize", v); end;
+
+function gui.Label:getField() return _gui_getFieldName(self.handle); end;
+function gui.Label:setField(v) _gui_setFieldName(self.handle, v); end;
+
+function gui.Label:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
+function gui.Label:setFrameRegion(v) _obj_setProp(self.handle, "FrameRegion", v); end;	
+
+gui.Label.props["autoSize"] = {setter = "setAutoSize", getter = "getAutoSize", tipo = "bool"};		
+gui.Label.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
+gui.Label.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};			
+gui.Label.props["format"] = {writeProp = "StringFormat", readProp = "StringFormat", tipo = "string"};		
+gui.Label.props["formatFloat"] = {writeProp = "StringFormatFloat", readProp = "StringFormatFloat", tipo = "string"};	
+
 local function labelFromHandle(handle)
-	local ctrl = textControlFromHandle(handle);		
-	
-	function ctrl:getAutoSize() return _obj_getProp(self.handle, "AutoSize"); end;
-	function ctrl:setAutoSize(v) _obj_setProp(self.handle, "AutoSize", v); end;
-	
-	function ctrl:getField() return _gui_getFieldName(self.handle); end;
-	function ctrl:setField(v) _gui_setFieldName(self.handle, v); end;
-	
-	function ctrl:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
-	function ctrl:setFrameRegion(v) _obj_setProp(self.handle, "FrameRegion", v); end;	
-					
-	ctrl.props["autoSize"] = {setter = "setAutoSize", getter = "getAutoSize", tipo = "bool"};		
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
-	ctrl.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};			
-	ctrl.props["format"] = {writeProp = "StringFormat", readProp = "StringFormat", tipo = "string"};		
-	ctrl.props["formatFloat"] = {writeProp = "StringFormatFloat", readProp = "StringFormatFloat", tipo = "string"};			
+	local ctrl = gui.Label.fromHandle(handle);							
 	return ctrl;	
 end
 
@@ -686,20 +690,21 @@ guiLoaders["label"] = labelFromHandle;
 
 --[[ Objeto CheckBox ]]--
 
+gui.CheckBox = gui.TextControl.inherit();
+
+function gui.CheckBox:getChecked() return _obj_getProp(self.handle, "IsChecked"); end;
+function gui.CheckBox:setChecked(v) return _obj_setProp(self.handle, "IsChecked", v); end;
+
+function gui.CheckBox:getField() return _obj_getProp(self.handle, "FieldName"); end;
+function gui.CheckBox:setField(v) return _obj_setProp(self.handle, "FieldName", v); end;
+
+gui.CheckBox.props["checked"] = {setter = "setChecked", getter = "getChecked", tipo = "bool"};
+gui.CheckBox.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};	
+
+gui.CheckBox.eves["onChange"] = "";	
+
 local function checkBoxFromHandle(handle)
-	local ctrl = textControlFromHandle(handle);		
-	
-	function ctrl:getChecked() return _obj_getProp(self.handle, "IsChecked"); end;
-	function ctrl:setChecked(v) return _obj_setProp(self.handle, "IsChecked", v); end;
-	
-	function ctrl:getField() return _obj_getProp(self.handle, "FieldName"); end;
-	function ctrl:setField(v) return _obj_setProp(self.handle, "FieldName", v); end;
-	
-	
-	ctrl.props["checked"] = {setter = "setChecked", getter = "getChecked", tipo = "bool"};
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};	
-	
-	ctrl.eves["onChange"] = "";	
+	local ctrl = gui.CheckBox.fromHandle(handle);				
 	return ctrl;	
 end
 
@@ -711,28 +716,29 @@ guiLoaders["checkBox"] = checkBoxFromHandle;
 
 --[[ Objeto RadioButton ]]--
 
+gui.RadioButton = gui.TextControl.inherit();
+
+function gui.RadioButton:getChecked() return _obj_getProp(self.handle, "IsChecked"); end;
+function gui.RadioButton:setChecked(v) return _obj_setProp(self.handle, "IsChecked", v); end;
+
+function gui.RadioButton:getField() return _obj_getProp(self.handle, "FieldName"); end;
+function gui.RadioButton:setField(v) return _obj_setProp(self.handle, "FieldName", v); end;
+
+function gui.RadioButton:getFieldValue() return _obj_getProp(self.handle, "FieldValue"); end;
+function gui.RadioButton:setFieldValue(v) return _obj_setProp(self.handle, "FieldValue", v); end;	
+
+function gui.RadioButton:getGroupName() return _obj_getProp(self.handle, "GroupName"); end;
+function gui.RadioButton:setGroupName(v) return _obj_setProp(self.handle, "GroupName", v); end;
+
+gui.RadioButton.props["checked"] = {setter = "setChecked", getter = "getChecked", tipo = "bool"};
+gui.RadioButton.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};	
+gui.RadioButton.props["fieldValue"] = {setter = "setFieldValue", getter = "getFieldValue", tipo = "string"};	
+gui.RadioButton.props["groupName"] = {setter = "setGroupName", getter = "getGroupName", tipo = "string"};	
+
+gui.RadioButton.eves["onChange"] = "";	
+
 local function radioButtonFromHandle(handle)
-	local ctrl = textControlFromHandle(handle);		
-	
-	function ctrl:getChecked() return _obj_getProp(self.handle, "IsChecked"); end;
-	function ctrl:setChecked(v) return _obj_setProp(self.handle, "IsChecked", v); end;
-	
-	function ctrl:getField() return _obj_getProp(self.handle, "FieldName"); end;
-	function ctrl:setField(v) return _obj_setProp(self.handle, "FieldName", v); end;
-	
-	function ctrl:getFieldValue() return _obj_getProp(self.handle, "FieldValue"); end;
-	function ctrl:setFieldValue(v) return _obj_setProp(self.handle, "FieldValue", v); end;	
-	
-	function ctrl:getGroupName() return _obj_getProp(self.handle, "GroupName"); end;
-	function ctrl:setGroupName(v) return _obj_setProp(self.handle, "GroupName", v); end;	
-	
-	
-	ctrl.props["checked"] = {setter = "setChecked", getter = "getChecked", tipo = "bool"};
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};	
-	ctrl.props["fieldValue"] = {setter = "setFieldValue", getter = "getFieldValue", tipo = "string"};	
-	ctrl.props["groupName"] = {setter = "setGroupName", getter = "getGroupName", tipo = "string"};	
-	
-	ctrl.eves["onChange"] = "";	
+	local ctrl = gui.RadioButton.fromHandle(handle);		
 	return ctrl;	
 end
 
@@ -742,40 +748,41 @@ end;
 
 guiLoaders["radioButton"] = radioButtonFromHandle;
 
-
 --[[ Objeto ImageCheckBox ]]--
 
+gui.ImageCheckBox = gui.Control.inherit();
+
+function gui.ImageCheckBox:getChecked() return _obj_getProp(self.handle, "IsChecked"); end;
+function gui.ImageCheckBox:setChecked(v) _obj_setProp(self.handle, "IsChecked", v); end;
+
+function gui.ImageCheckBox:getField() return _obj_getProp(self.handle, "FieldName"); end;
+function gui.ImageCheckBox:setField(v) _obj_setProp(self.handle, "FieldName", v); end;
+
+function gui.ImageCheckBox:getImageChecked() return _obj_getProp(self.handle, "ImageChecked"); end;
+function gui.ImageCheckBox:setImageChecked(v) _obj_setProp(self.handle, "ImageChecked", v); end;
+
+function gui.ImageCheckBox:getImageUnchecked() return _obj_getProp(self.handle, "ImageUnchecked"); end;
+function gui.ImageCheckBox:setImageUnchecked(v) _obj_setProp(self.handle, "ImageUnchecked", v); end;	
+
+function gui.ImageCheckBox:getOptimize() return _obj_getProp(self.handle, "Optimize"); end;
+function gui.ImageCheckBox:setOptimize(opt) return _obj_setProp(self.handle, "Optimize", opt); end;			
+
+function gui.ImageCheckBox:getAutoChange() return _obj_getProp(self.handle, "AutoChange"); end;
+function gui.ImageCheckBox:setAutoChange(v) return _obj_setProp(self.handle, "AutoChange", v); end;		
+
+gui.ImageCheckBox.props["checked"] = {setter = "setChecked", getter = "getChecked", tipo = "bool"};
+gui.ImageCheckBox.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
+gui.ImageCheckBox.props["imageChecked"] = {setter = "setImageChecked", getter = "getImageChecked", tipo = "url"};		
+gui.ImageCheckBox.props["checkedImage"] = {setter = "setImageChecked", getter = "getImageChecked", tipo = "url"};			
+gui.ImageCheckBox.props["imageUnchecked"] = {setter = "setImageUnchecked", getter = "getImageUnchecked", tipo = "url"};			
+gui.ImageCheckBox.props["uncheckedImage"] = {setter = "setImageUnchecked", getter = "getImageUnchecked", tipo = "url"};				
+gui.ImageCheckBox.props["optimize"] = {setter = "setOptimize", getter = "getOptimize", tipo = "bool"};	
+gui.ImageCheckBox.props["autoChange"] = {setter = "setAutoChange", getter = "getAutoChange", tipo = "bool"};	
+
+gui.ImageCheckBox.eves["onChange"] = "";	
+
 local function imageCheckBoxFromHandle(handle)
-	local ctrl = controlFromHandle(handle);		
-	
-	function ctrl:getChecked() return _obj_getProp(self.handle, "IsChecked"); end;
-	function ctrl:setChecked(v) _obj_setProp(self.handle, "IsChecked", v); end;
-	
-	function ctrl:getField() return _obj_getProp(self.handle, "FieldName"); end;
-	function ctrl:setField(v) _obj_setProp(self.handle, "FieldName", v); end;
-	
-	function ctrl:getImageChecked() return _obj_getProp(self.handle, "ImageChecked"); end;
-	function ctrl:setImageChecked(v) _obj_setProp(self.handle, "ImageChecked", v); end;
-	
-	function ctrl:getImageUnchecked() return _obj_getProp(self.handle, "ImageUnchecked"); end;
-	function ctrl:setImageUnchecked(v) _obj_setProp(self.handle, "ImageUnchecked", v); end;	
-	
-	function ctrl:getOptimize() return _obj_getProp(self.handle, "Optimize"); end;
-	function ctrl:setOptimize(opt) return _obj_setProp(self.handle, "Optimize", opt); end;			
-	
-	function ctrl:getAutoChange() return _obj_getProp(self.handle, "AutoChange"); end;
-	function ctrl:setAutoChange(v) return _obj_setProp(self.handle, "AutoChange", v); end;		
-	
-	ctrl.props["checked"] = {setter = "setChecked", getter = "getChecked", tipo = "bool"};
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
-	ctrl.props["imageChecked"] = {setter = "setImageChecked", getter = "getImageChecked", tipo = "url"};		
-	ctrl.props["checkedImage"] = {setter = "setImageChecked", getter = "getImageChecked", tipo = "url"};			
-	ctrl.props["imageUnchecked"] = {setter = "setImageUnchecked", getter = "getImageUnchecked", tipo = "url"};			
-	ctrl.props["uncheckedImage"] = {setter = "setImageUnchecked", getter = "getImageUnchecked", tipo = "url"};				
-	ctrl.props["optimize"] = {setter = "setOptimize", getter = "getOptimize", tipo = "bool"};	
-	ctrl.props["autoChange"] = {setter = "setAutoChange", getter = "getAutoChange", tipo = "bool"};	
-	
-	ctrl.eves["onChange"] = "";	
+	local ctrl = gui.ImageCheckBox.fromHandle(handle);			
 	return ctrl;	
 end
 
@@ -787,71 +794,72 @@ guiLoaders["imageCheckBox"] = imageCheckBoxFromHandle;
 
 --[[ Objeto Image ]]--
 
+gui.Image = gui.Control.inherit();
+
+function gui.Image:getImageURL() return _obj_getProp(self.handle, "URLImagem"); end;
+function gui.Image:setImageURL(url) return _obj_setProp(self.handle, "URLImagem", url); end;
+
+function gui.Image:getURL() return _obj_getProp(self.handle, "URLImagem"); end;
+function gui.Image:setURL(url) return _obj_setProp(self.handle, "URLImagem", url); end;	
+
+function gui.Image:getSRC() return _obj_getProp(self.handle, "URLImagem"); end;
+function gui.Image:setSRC(src) return _obj_setProp(self.handle, "URLImagem", src); end;		
+
+function gui.Image:getShowStyle() return _obj_getProp(self.handle, "ShowStyle"); end;
+function gui.Image:setShowStyle(showStyle) return _obj_setProp(self.handle, "ShowStyle", showStyle); end;	
+
+function gui.Image:getStyle() return _obj_getProp(self.handle, "ShowStyle"); end;
+function gui.Image:setStyle(style) return _obj_setProp(self.handle, "ShowStyle", style); end;	
+
+function gui.Image:getCenter() return _obj_getProp(self.handle, "Center"); end;
+function gui.Image:setCenter(center) return _obj_setProp(self.handle, "Center", center); end;	
+
+function gui.Image:getOptimizeQuality() return _obj_getProp(self.handle, "OtimizarDesenho"); end;
+function gui.Image:setOptimizeQuality(opt) return _obj_setProp(self.handle, "OtimizarDesenho", opt); end;	
+function gui.Image:getOptimize() return _obj_getProp(self.handle, "OtimizarDesenho"); end;
+function gui.Image:setOptimize(opt) return _obj_setProp(self.handle, "OtimizarDesenho", opt); end;		
+
+function gui.Image:getShowProgress() return _obj_getProp(self.handle, "ExibirProgresso"); end;
+function gui.Image:setShowProgress(showProgress) return _obj_setProp(self.handle, "ExibirProgresso", showProgress); end;		
+
+function gui.Image:getURLWhileLoading() return _obj_getProp(self.handle, "NoImageURL"); end;
+function gui.Image:setURLWhileLoading(url) return _obj_setProp(self.handle, "NoImageURL", url); end;	
+
+function gui.Image:getField() return _obj_getProp(self.handle, "FieldName"); end;
+function gui.Image:setField(v) _obj_setProp(self.handle, "FieldName", v); end;		
+
+function gui.Image:getEditable() return _obj_getProp(self.handle, "Editable"); end;
+function gui.Image:setEditable(v) _obj_setProp(self.handle, "Editable", v); end;		
+
+function gui.Image:getNaturalWidth() return _obj_getProp(self.handle, "NaturalWidth"); end;
+function gui.Image:getNaturalHeight() return _obj_getProp(self.handle, "NaturalHeight"); end;	
+
+gui.Image.props["imageURL"] = {setter = "setImageURL", getter="getImageURL", tipo="url"};
+gui.Image.props["url"] = {setter = "setURL", getter="getURL", tipo="url"};	
+gui.Image.props["src"] = {setter = "setSRC", getter="getSRC", tipo="url"};		
+gui.Image.props["URLWhileLoading"] = {setter = "setURLWhileLoading", getter="getURLWhileLoading", tipo="url"};
+
+gui.Image.props["showStyle"] = {setter = "setShowStyle", getter="getShowStyle", tipo="enum",
+							values = {"proportional", "autoFit", "originalSize", "stretch"}};								
+gui.Image.props["style"] = {setter = "setStyle", getter="getStyle", tipo="enum",
+							values = {"proportional", "autoFit", "originalSize", "stretch"}};	
+
+gui.Image.props["center"] = {setter = "setCenter", getter="getCenter", tipo="bool"};
+gui.Image.props["optimizeQuality"] = {setter = "setOptimizeQuality", getter="getOptimizeQuality", tipo="bool"};
+gui.Image.props["optimize"] = {setter = "setOptimize", getter="getOptimize", tipo="bool"};	
+gui.Image.props["showProgress"] = {setter = "setShowProgress", getter="getShowProgress", tipo="bool"};
+gui.Image.props["field"] = {setter = "setField", getter="getField", tipo="string"};	
+gui.Image.props["editable"] = {setter = "setEditable", getter="getEditable", tipo="bool"};		
+gui.Image.props["naturalAnimated"] = {readProp="NaturalAnimated", tipo="bool"};				
+gui.Image.props["naturalWidth"] = {getter="getNaturalWidth", tipo="double"};			
+gui.Image.props["naturalHeight"] = {getter="getNaturalHeight", tipo="double"};			
+gui.Image.props["animate"] = {readProp="Animate", writeProp="Animate", tipo="bool"};			
+
+gui.Image.eves["onPictureLoadedChange"] = "";
+gui.Image.eves["onLoad"] = "";
+
 local function imageFromHandle(handle)
-	local image = controlFromHandle(handle);		
-	
-	function image:getImageURL() return _obj_getProp(self.handle, "URLImagem"); end;
-	function image:setImageURL(url) return _obj_setProp(self.handle, "URLImagem", url); end;
-	
-	function image:getURL() return _obj_getProp(self.handle, "URLImagem"); end;
-	function image:setURL(url) return _obj_setProp(self.handle, "URLImagem", url); end;	
-	
-	function image:getSRC() return _obj_getProp(self.handle, "URLImagem"); end;
-	function image:setSRC(src) return _obj_setProp(self.handle, "URLImagem", src); end;		
-	
-	function image:getShowStyle() return _obj_getProp(self.handle, "ShowStyle"); end;
-	function image:setShowStyle(showStyle) return _obj_setProp(self.handle, "ShowStyle", showStyle); end;	
-
-	function image:getStyle() return _obj_getProp(self.handle, "ShowStyle"); end;
-	function image:setStyle(style) return _obj_setProp(self.handle, "ShowStyle", style); end;	
-
-	function image:getCenter() return _obj_getProp(self.handle, "Center"); end;
-	function image:setCenter(center) return _obj_setProp(self.handle, "Center", center); end;	
-	
-	function image:getOptimizeQuality() return _obj_getProp(self.handle, "OtimizarDesenho"); end;
-	function image:setOptimizeQuality(opt) return _obj_setProp(self.handle, "OtimizarDesenho", opt); end;	
-	function image:getOptimize() return _obj_getProp(self.handle, "OtimizarDesenho"); end;
-	function image:setOptimize(opt) return _obj_setProp(self.handle, "OtimizarDesenho", opt); end;		
-	
-	function image:getShowProgress() return _obj_getProp(self.handle, "ExibirProgresso"); end;
-	function image:setShowProgress(showProgress) return _obj_setProp(self.handle, "ExibirProgresso", showProgress); end;		
-	
-	function image:getURLWhileLoading() return _obj_getProp(self.handle, "NoImageURL"); end;
-	function image:setURLWhileLoading(url) return _obj_setProp(self.handle, "NoImageURL", url); end;	
-	
-	function image:getField() return _obj_getProp(self.handle, "FieldName"); end;
-	function image:setField(v) _obj_setProp(self.handle, "FieldName", v); end;		
-	
-	function image:getEditable() return _obj_getProp(self.handle, "Editable"); end;
-	function image:setEditable(v) _obj_setProp(self.handle, "Editable", v); end;		
-	
-	function image:getNaturalWidth() return _obj_getProp(self.handle, "NaturalWidth"); end;
-	function image:getNaturalHeight() return _obj_getProp(self.handle, "NaturalHeight"); end;	
-	
-	image.props["imageURL"] = {setter = "setImageURL", getter="getImageURL", tipo="url"};
-	image.props["url"] = {setter = "setURL", getter="getURL", tipo="url"};	
-	image.props["src"] = {setter = "setSRC", getter="getSRC", tipo="url"};		
-	image.props["URLWhileLoading"] = {setter = "setURLWhileLoading", getter="getURLWhileLoading", tipo="url"};
-	
-	image.props["showStyle"] = {setter = "setShowStyle", getter="getShowStyle", tipo="enum",
-								values = {"proportional", "autoFit", "originalSize", "stretch"}};								
-	image.props["style"] = {setter = "setStyle", getter="getStyle", tipo="enum",
-								values = {"proportional", "autoFit", "originalSize", "stretch"}};	
-	
-	image.props["center"] = {setter = "setCenter", getter="getCenter", tipo="bool"};
-	image.props["optimizeQuality"] = {setter = "setOptimizeQuality", getter="getOptimizeQuality", tipo="bool"};
-	image.props["optimize"] = {setter = "setOptimize", getter="getOptimize", tipo="bool"};	
-	image.props["showProgress"] = {setter = "setShowProgress", getter="getShowProgress", tipo="bool"};
-	image.props["field"] = {setter = "setField", getter="getField", tipo="string"};	
-	image.props["editable"] = {setter = "setEditable", getter="getEditable", tipo="bool"};		
-	image.props["naturalAnimated"] = {readProp="NaturalAnimated", tipo="bool"};				
-	image.props["naturalWidth"] = {getter="getNaturalWidth", tipo="double"};			
-	image.props["naturalHeight"] = {getter="getNaturalHeight", tipo="double"};			
-	image.props["animate"] = {readProp="Animate", writeProp="Animate", tipo="bool"};			
-	
-	image.eves["onPictureLoadedChange"] = "";
-	image.eves["onLoad"] = "";	
-	
+	local image = gui.Image.fromHandle(handle);		
 	return image;	
 end
 
@@ -861,70 +869,71 @@ end;
 
 guiLoaders["image"] = imageFromHandle;
 
-
 --[[ Objeto Edit ]]--
 
-local function editFromHandle(handle)
-	local edit = textControlFromHandle(handle);		
-	edit = _addEditablePropsToObject(edit);
-	
-	function edit:getTextPrompt() return _obj_getProp(self.handle, "TextPrompt"); end;
-	function edit:setTextPrompt(text) _obj_setProp(self.handle, "TextPrompt", text); end;
-	
-	function edit:getTransparent() _obj_getProp(self.handle, "Transparent"); end;
-	function edit:setTransparent(transparent) _obj_setProp(self.handle, "Transparent", transparent); end;
-			
-	function edit:getIsPasswordEdit() return _obj_getProp(self.handle, "Password"); end;
-	function edit:setIsPasswordEdit(isPasswordEdit) _obj_setProp(self.handle, "Password", isPasswordEdit); end;
-	
-	function edit:getKeyboardType() return _obj_getProp(self.handle, "KeyboardType"); end;
-	function edit:setKeyboardType(kbtype) _obj_setProp(self.handle, "KeyboardType", kbtype); end;
-	
-	function edit:getEnterKeyType() return _obj_getProp(self.handle, "ReturnKeyType"); end;
-	function edit:setEnterKeyType(enterType) _obj_setProp(self.handle, "ReturnKeyType", enterType); end;
-	
-	function edit:getField() return _gui_getFieldName(self.handle); end;
-	function edit:setField(field) _gui_setFieldName(self.handle, field); end;
-			
-	function edit:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
-	function edit:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;			
+gui.Edit = gui.TextControl.inherit();
+
+_addEditablePropsToObject(gui.Edit);
+
+function gui.Edit:getTextPrompt() return _obj_getProp(self.handle, "TextPrompt"); end;
+function gui.Edit:setTextPrompt(text) _obj_setProp(self.handle, "TextPrompt", text); end;
+
+function gui.Edit:getTransparent() _obj_getProp(self.handle, "Transparent"); end;
+function gui.Edit:setTransparent(transparent) _obj_setProp(self.handle, "Transparent", transparent); end;
 		
-	function edit:getType() return _obj_getProp(self.handle, "EditType"); end;
-	function edit:setType(v) _obj_setProp(self.handle, "EditType", v) end;		
+function gui.Edit:getIsPasswordEdit() return _obj_getProp(self.handle, "Password"); end;
+function gui.Edit:setIsPasswordEdit(isPasswordEdit) _obj_setProp(self.handle, "Password", isPasswordEdit); end;
+
+function gui.Edit:getKeyboardType() return _obj_getProp(self.handle, "KeyboardType"); end;
+function gui.Edit:setKeyboardType(kbtype) _obj_setProp(self.handle, "KeyboardType", kbtype); end;
+
+function gui.Edit:getEnterKeyType() return _obj_getProp(self.handle, "ReturnKeyType"); end;
+function gui.Edit:setEnterKeyType(enterType) _obj_setProp(self.handle, "ReturnKeyType", enterType); end;
+
+function gui.Edit:getField() return _gui_getFieldName(self.handle); end;
+function gui.Edit:setField(field) _gui_setFieldName(self.handle, field); end;
+		
+function gui.Edit:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
+function gui.Edit:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;			
 	
-	function edit:getMin() return _obj_getProp(self.handle, "MinValue"); end;
-	function edit:setMin(v) _obj_setProp(self.handle, "MinValue", v) end;		
-	
-	function edit:getMax() return _obj_getProp(self.handle, "MaxValue"); end;
-	function edit:setMax(v) _obj_setProp(self.handle, "MaxValue", v) end;		
-	
-	function edit:getDecimalPlaces() return _obj_getProp(self.handle, "DecimalPlaces"); end;
-	function edit:setDecimalPlaces(v) _obj_setProp(self.handle, "DecimalPlaces", v) end;			
-	
-	function edit:getAsNumber() return _obj_getProp(self.handle, "AsNumber"); end;
-	function edit:setAsNumber(v) _obj_setProp(self.handle, "AsNumber", v) end;			
-			
-	edit.props["textPrompt"] = {setter="setTextPrompt", getter="getTextPrompt", tipo="string"};
-	edit.props["transparent"] = {setter="setTransparent", getter="getTransparent", tipo="bool"};	
-	edit.props["isPasswordEdit"] = {setter="setIsPasswordEdit", getter="getIsPasswordEdit", tipo="bool"};
-	
-	edit.props["keyboardType"] = {setter="setKeyboardType", getter="getKeyboardType", tipo="enum",
-								  values = {"default", "numbersAndPunctuation", "numberPad",
-								            "phonePad", "alphabet", "url", "email"}};
-											
-	edit.props["enterKeyType"] = {setter="setEnterKeyType", getter="getEnterKeyType", tipo="enum",
+function gui.Edit:getType() return _obj_getProp(self.handle, "EditType"); end;
+function gui.Edit:setType(v) _obj_setProp(self.handle, "EditType", v) end;		
+
+function gui.Edit:getMin() return _obj_getProp(self.handle, "MinValue"); end;
+function gui.Edit:setMin(v) _obj_setProp(self.handle, "MinValue", v) end;		
+
+function gui.Edit:getMax() return _obj_getProp(self.handle, "MaxValue"); end;
+function gui.Edit:setMax(v) _obj_setProp(self.handle, "MaxValue", v) end;		
+
+function gui.Edit:getDecimalPlaces() return _obj_getProp(self.handle, "DecimalPlaces"); end;
+function gui.Edit:setDecimalPlaces(v) _obj_setProp(self.handle, "DecimalPlaces", v) end;			
+
+function gui.Edit:getAsNumber() return _obj_getProp(self.handle, "AsNumber"); end;
+function gui.Edit:setAsNumber(v) _obj_setProp(self.handle, "AsNumber", v) end;			
+		
+gui.Edit.props["textPrompt"] = {setter="setTextPrompt", getter="getTextPrompt", tipo="string"};
+gui.Edit.props["transparent"] = {setter="setTransparent", getter="getTransparent", tipo="bool"};	
+gui.Edit.props["isPasswordEdit"] = {setter="setIsPasswordEdit", getter="getIsPasswordEdit", tipo="bool"};
+
+gui.Edit.props["keyboardType"] = {setter="setKeyboardType", getter="getKeyboardType", tipo="enum",
+									values = {"default", "numbersAndPunctuation", "numberPad",
+											  "phonePad", "alphabet", "url", "email"}};
+										
+gui.Edit.props["enterKeyType"] = {setter="setEnterKeyType", getter="getEnterKeyType", tipo="enum",
 								  values = {"default", "done", "go", "next", "search", "send"}};											
-											
-	edit.props["field"] = {setter="setField", getter="getField", tipo="string"};	
-	edit.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};			
-	edit.props["type"] = {setter = "setType", getter = "getType", tipo = "enum",
-						  values = {"text", "number", "float"}};	
-	edit.props["min"] = {setter = "setMin", getter = "getMin", tipo = "double"};								  
-	edit.props["max"] = {setter = "setMax", getter = "getMax", tipo = "double"};			
-	edit.props["decimalPlaces"] = {setter = "setDecimalPlaces", getter = "getDecimalPlaces", tipo = "int"};			
-	edit.props["asNumber"] = {setter = "setAsNumber", getter = "getAsNumber", tipo = "double"};				
-	
-	edit.eves["onUserChange"] = "";	
+										
+gui.Edit.props["field"] = {setter="setField", getter="getField", tipo="string"};	
+gui.Edit.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};	
+gui.Edit.props["type"] = {setter = "setType", getter = "getType", tipo = "enum", values = {"text", "number", "float"}};					  
+gui.Edit.props["min"] = {setter = "setMin", getter = "getMin", tipo = "double"};								  
+gui.Edit.props["max"] = {setter = "setMax", getter = "getMax", tipo = "double"};			
+gui.Edit.props["decimalPlaces"] = {setter = "setDecimalPlaces", getter = "getDecimalPlaces", tipo = "int"};			
+gui.Edit.props["asNumber"] = {setter = "setAsNumber", getter = "getAsNumber", tipo = "double"};				
+
+gui.Edit.eves["onUserChange"] = "";	
+
+local function editFromHandle(handle)
+	local edit = gui.Edit.fromHandle(handle);		
 	return edit;	
 end
 
@@ -934,46 +943,48 @@ end;
 
 guiLoaders["edit"] = editFromHandle;
 
-
 --[[ Objeto ComboBox ]]--
 
-local function comboBoxFromHandle(handle)	
-	local edit = controlFromHandle(handle);
-	edit = _addFontPropertiesToObject(edit);
-	edit = _addTextStylePropsToObject(edit);	
-		
-	function edit:getTransparent() _obj_getProp(self.handle, "Transparent"); end;
-	function edit:setTransparent(transparent) _obj_setProp(self.handle, "Transparent", transparent); end;
-				
-	function edit:getField() return _gui_getFieldName(self.handle); end;
-	function edit:setField(field) _gui_setFieldName(self.handle, field); end;
-			
-	function edit:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
-	function edit:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;			
-				
-	function edit:getText() return _obj_getProp(self.handle, "Text"); end;
-	function edit:setText(v) _obj_setProp(self.handle, "Text", v) end;					
-	
-	function edit:getValue() return _obj_getProp(self.handle, "Value"); end;
-	function edit:setValue(v) _obj_setProp(self.handle, "Value", v) end;						
-				
-	function edit:getItems() return _obj_getProp(self.handle, "ItemsI18N"); end;
-	function edit:setItems(v) _obj_setProp(self.handle, "ItemsI18N", v) end;	
+gui.ComboBox = gui.Control.inherit();
 
-	function edit:getValues() return _obj_getProp(self.handle, "Values"); end;
-	function edit:setValues(v) _obj_setProp(self.handle, "Values", v) end;	
-				
-	function edit:dropDown() _obj_invoke(self.handle, "InvokeDropDown"); end;
-				
-	edit.props["transparent"] = {setter="setTransparent", getter="getTransparent", tipo="bool"};													
-	edit.props["field"] = {setter="setField", getter="getField", tipo="string"};	
-	edit.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};			
-	edit.props["items"] = {setter = "setItems", getter = "getItems", tipo = "table"};				
-	edit.props["values"] = {setter = "setValues", getter = "getValues", tipo = "table"};				
-	edit.props["text"] = {setter = "setText", getter = "getText", tipo = "string"};				
-	edit.props["value"] = {setter = "setValue", getter = "getValue", tipo = "string"};				
-	
-	edit.eves["onChange"] = "";
+_addFontPropertiesToObject(gui.ComboBox);
+_addTextStylePropsToObject(gui.ComboBox);
+
+function gui.ComboBox:getTransparent() _obj_getProp(self.handle, "Transparent"); end;
+function gui.ComboBox:setTransparent(transparent) _obj_setProp(self.handle, "Transparent", transparent); end;
+			
+function gui.ComboBox:getField() return _gui_getFieldName(self.handle); end;
+function gui.ComboBox:setField(field) _gui_setFieldName(self.handle, field); end;
+		
+function gui.ComboBox:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
+function gui.ComboBox:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;			
+			
+function gui.ComboBox:getText() return _obj_getProp(self.handle, "Text"); end;
+function gui.ComboBox:setText(v) _obj_setProp(self.handle, "Text", v) end;					
+
+function gui.ComboBox:getValue() return _obj_getProp(self.handle, "Value"); end;
+function gui.ComboBox:setValue(v) _obj_setProp(self.handle, "Value", v) end;						
+			
+function gui.ComboBox:getItems() return _obj_getProp(self.handle, "ItemsI18N"); end;
+function gui.ComboBox:setItems(v) _obj_setProp(self.handle, "ItemsI18N", v) end;	
+
+function gui.ComboBox:getValues() return _obj_getProp(self.handle, "Values"); end;
+function gui.ComboBox:setValues(v) _obj_setProp(self.handle, "Values", v) end;	
+			
+function gui.ComboBox:dropDown() _obj_invoke(self.handle, "InvokeDropDown"); end;
+			
+gui.ComboBox.props["transparent"] = {setter="setTransparent", getter="getTransparent", tipo="bool"};													
+gui.ComboBox.props["field"] = {setter="setField", getter="getField", tipo="string"};	
+gui.ComboBox.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};			
+gui.ComboBox.props["items"] = {setter = "setItems", getter = "getItems", tipo = "table"};				
+gui.ComboBox.props["values"] = {setter = "setValues", getter = "getValues", tipo = "table"};				
+gui.ComboBox.props["text"] = {setter = "setText", getter = "getText", tipo = "string"};				
+gui.ComboBox.props["value"] = {setter = "setValue", getter = "getValue", tipo = "string"};				
+
+gui.ComboBox.eves["onChange"] = "";
+
+local function comboBoxFromHandle(handle)	
+	local edit = gui.ComboBox.fromHandle(handle);	
 	return edit;	
 end
 
@@ -985,31 +996,32 @@ guiLoaders["comboBox"] = comboBoxFromHandle;
 
 --[[ Objeto ColorComboBox ]]--
 
-local function colorComboBoxFromHandle(handle)	
-	local edit = controlFromHandle(handle);
-		
-	function edit:getColor() return _obj_getProp(self.handle, "Color"); end;
-	function edit:setColor(v) _obj_setProp(self.handle, "Color", v); end;
-	
-	function edit:getUseAlpha() return _obj_getProp(self.handle, "UseAlpha"); end;
-	function edit:setUseAlpha(v) _obj_setProp(self.handle, "UseAlpha", v); end;	
-				
-	function edit:getField() return _gui_getFieldName(self.handle); end;
-	function edit:setField(field) _gui_setFieldName(self.handle, field); end;
+gui.ColorComboBox = gui.Control.inherit();
+
+function gui.ColorComboBox:getColor() return _obj_getProp(self.handle, "Color"); end;
+function gui.ColorComboBox:setColor(v) _obj_setProp(self.handle, "Color", v); end;
+
+function gui.ColorComboBox:getUseAlpha() return _obj_getProp(self.handle, "UseAlpha"); end;
+function gui.ColorComboBox:setUseAlpha(v) _obj_setProp(self.handle, "UseAlpha", v); end;	
 			
-	function edit:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
-	function edit:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;			
-					
-	function edit:dropDown() _obj_invoke(self.handle, "InvokeDropDown"); end;
+function gui.ColorComboBox:getField() return _gui_getFieldName(self.handle); end;
+function gui.ColorComboBox:setField(field) _gui_setFieldName(self.handle, field); end;
+		
+function gui.ColorComboBox:getFrameRegion() return _obj_getProp(self.handle, "FrameRegion"); end;
+function gui.ColorComboBox:setFrameRegion(frameRegion) _obj_setProp(self.handle, "FrameRegion", frameRegion) end;			
 				
-	edit.props["color"] = {setter="setColor", getter="getColor", tipo="color"};													
-	edit.props["useAlpha"] = {setter = "setUseAlpha", getter = "getUseAlpha", tipo = "bool"};				
-	edit.props["field"] = {setter="setField", getter="getField", tipo="string"};	
-	edit.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};				
-	
-	
-	edit.eves["onChange"] = "";
-	edit.eves["onUserChange"] = "";
+function gui.ColorComboBox:dropDown() _obj_invoke(self.handle, "InvokeDropDown"); end;
+			
+gui.ColorComboBox.props["color"] = {setter="setColor", getter="getColor", tipo="color"};													
+gui.ColorComboBox.props["useAlpha"] = {setter = "setUseAlpha", getter = "getUseAlpha", tipo = "bool"};				
+gui.ColorComboBox.props["field"] = {setter="setField", getter="getField", tipo="string"};	
+gui.ColorComboBox.props["frameRegion"] = {setter = "setFrameRegion", getter = "getFrameRegion", tipo = "string"};				
+
+gui.ColorComboBox.eves["onChange"] = "";
+gui.ColorComboBox.eves["onUserChange"] = "";
+
+local function colorComboBoxFromHandle(handle)	
+	local edit = gui.ColorComboBox.fromHandle(handle);		
 	return edit;	
 end
 
@@ -1022,18 +1034,21 @@ guiLoaders["colorComboBox"] = colorComboBoxFromHandle;
 
 --[[ Objeto TextEditor ]]--
 
-local function textEditorFromHandle(handle)
-	local editor = textControlFromHandle(handle);	
-	editor = _addEditablePropsToObject(editor);
-		
-	function editor:getField() return _obj_getProp(self.handle, "FieldName"); end;
-	function editor:setField(v) _obj_setProp(self.handle, "FieldName", v); end;
+gui.TextEditor = gui.TextControl.inherit();
+
+_addEditablePropsToObject(gui.TextEditor);
+
+function gui.TextEditor:getField() return _obj_getProp(self.handle, "FieldName"); end;
+function gui.TextEditor:setField(v) _obj_setProp(self.handle, "FieldName", v); end;
+
+function gui.TextEditor:getTransparent() return _obj_getProp(self.handle, "Transparent"); end;
+function gui.TextEditor:setTransparent(v) _obj_setProp(self.handle, "Transparent", v); end;	
 	
-	function editor:getTransparent() return _obj_getProp(self.handle, "Transparent"); end;
-	function editor:setTransparent(v) _obj_setProp(self.handle, "Transparent", v); end;	
-		
-	editor.props["field"] = {setter="setField", getter="getField", tipo="string"};		
-	editor.props["transparent"] = {setter="setTransparent", getter="getTransparent", tipo="bool"};	
+gui.TextEditor.props["field"] = {setter="setField", getter="getField", tipo="string"};		
+gui.TextEditor.props["transparent"] = {setter="setTransparent", getter="getTransparent", tipo="bool"};	
+
+local function textEditorFromHandle(handle)
+	local editor = gui.TextEditor.fromHandle(handle);			
 	return editor;	
 end
 
@@ -1045,13 +1060,15 @@ guiLoaders["textEditor"] = textEditorFromHandle;
 
 --[[ Objeto TabControl ]]--
 
+gui.TabControl = gui.Control.inherit();
+
+function gui.TabControl:getTabIndex() return _obj_getProp(self.handle, "TabIndex"); end;
+function gui.TabControl :setTabIndex(idx) _obj_setProp(self.handle, "TabIndex", idx); end;
+	
+gui.TabControl .props["tabIndex"] = {setter="setTabIndex", getter="getTabIndex", tipo="int"};	
+
 local function tabControlFromHandle(handle)
-	local ctrl = controlFromHandle(handle);	
-		
-	function ctrl:getTabIndex() return _obj_getProp(self.handle, "TabIndex"); end;
-	function ctrl:setTabIndex(idx) _obj_setProp(self.handle, "TabIndex", idx); end;
-		
-	ctrl.props["tabIndex"] = {setter="setTabIndex", getter="getTabIndex", tipo="int"};			
+	local ctrl = gui.TabControl.fromHandle(handle);				
 	return ctrl;	
 end
 
@@ -1063,19 +1080,20 @@ guiLoaders["tabControl"] = tabControlFromHandle;
 
 --[[ Objeto Tab / TabItem ]]--
 
+gui.TabItem = gui.Control.inherit();
+
+function gui.TabItem:getText() return _obj_getProp(self.handle, "Title"); end;
+function gui.TabItem:setText(text) _obj_setProp(self.handle, "Title", text); end;
+
+function gui.TabItem:getTitle() return _obj_getProp(self.handle, "Title"); end;
+function gui.TabItem:setTitle(title) _obj_setProp(self.handle, "Title", title); end;	
+function gui.TabItem:activate() _obj_invoke(self.handle, "Activate"); end;		
+
+gui.TabItem.props["text"] = {setter="setText", getter="getText", tipo="string"};
+gui.TabItem.props["title"] = {setter="setTitle", getter="getTitle", tipo="string"};
+
 local function tabItemFromHandle(handle)
-	local ctrl = controlFromHandle(handle);	
-		
-	function ctrl:getText() return _obj_getProp(self.handle, "Title"); end;
-	function ctrl:setText(text) _obj_setProp(self.handle, "Title", text); end;
-	
-	function ctrl:getTitle() return _obj_getProp(self.handle, "Title"); end;
-	function ctrl:setTitle(title) _obj_setProp(self.handle, "Title", title); end;	
-	function ctrl:activate() _obj_invoke(self.handle, "Activate"); end;		
-	
-	ctrl.props["text"] = {setter="setText", getter="getText", tipo="string"};
-	ctrl.props["title"] = {setter="setTitle", getter="getTitle", tipo="string"};
-					
+	local ctrl = gui.TabItem.fromHandle(handle);						
 	return ctrl;	
 end
 
@@ -1105,74 +1123,77 @@ guiLoaders["scrollBox"] = scrollBoxFromHandle;
 
 --[[ Objeto Shape ]]--
 
-local function shapeFromHandle(handle)
-	local ctrl = controlFromHandle(handle);	
-					
-	function ctrl:getColor() return _obj_getProp(self.handle, "Fill.Color"); end;
-	function ctrl:setColor(color) _gui_shapeSetFillColor(self.handle, color); end;
-	
-	function ctrl:getStrokeColor() return _obj_getProp(self.handle, "Stroke.Color"); end;
-	function ctrl:setStrokeColor(color) _gui_shapeSetStrokeColor(self.handle, color); end;
-	
-	function ctrl:getStrokeSize() return _obj_getProp(self.handle, "Stroke.Thickness"); end;
-	function ctrl:setStrokeSize(size) _gui_shapeSetStrokeSize(self.handle, size); end;	
-	
-	function ctrl:getStrokeCap() return _obj_getProp(self.handle, "Stroke.Cap"); end;
-	function ctrl:setStrokeCap(v) _gui_shapeSetStrokeCap(self.handle, v); end;		
-	
-	function ctrl:getStrokeJoin() return _obj_getProp(self.handle, "Stroke.Join"); end;
-	function ctrl:setStrokeJoin(v) _gui_shapeSetStrokeCap(self.handle, v); end;			
-	
-	function ctrl:getStrokeDash() return _obj_getProp(self.handle, "Stroke.Dash"); end;
-	function ctrl:setStrokeDash(v) _gui_shapeSetStrokeCap(self.handle, v); end;	
-	
-	ctrl.props["color"] = {setter="setColor", getter="getColor", tipo="color"};
-	ctrl.props["strokeColor"] = {setter="setStrokeColor", getter="getStrokeColor", tipo="color"};
-	ctrl.props["strokeSize"] = {setter="setStrokeSize", getter="getStrokeSize", tipo="double"};	
-	
-	ctrl.props["strokeCap"] = {setter="setStrokeCap", getter="getStrokeCap", tipo="enum",
-							   values={"flat", "round"}};		
-							   
-	ctrl.props["strokeJoin"] = {setter="setStrokeJoin", getter="getStrokeJoin", tipo="enum",
-							   values={"miter", "round", "bevel"}};
+gui.Shape = gui.Control.inherit();
 
-	ctrl.props["strokeDash"] = {setter="setStrokeDash", getter="getStrokeDash", tipo="enum",
-							   values={"solid", "dash", "dot", "dashDot", "dashDotDot"}};		
-		
+function gui.Shape:getColor() return _obj_getProp(self.handle, "Fill.Color"); end;
+function gui.Shape:setColor(color) _gui_shapeSetFillColor(self.handle, color); end;
+
+function gui.Shape:getStrokeColor() return _obj_getProp(self.handle, "Stroke.Color"); end;
+function gui.Shape:setStrokeColor(color) _gui_shapeSetStrokeColor(self.handle, color); end;
+
+function gui.Shape:getStrokeSize() return _obj_getProp(self.handle, "Stroke.Thickness"); end;
+function gui.Shape:setStrokeSize(size) _gui_shapeSetStrokeSize(self.handle, size); end;	
+
+function gui.Shape:getStrokeCap() return _obj_getProp(self.handle, "Stroke.Cap"); end;
+function gui.Shape:setStrokeCap(v) _gui_shapeSetStrokeCap(self.handle, v); end;		
+
+function gui.Shape:getStrokeJoin() return _obj_getProp(self.handle, "Stroke.Join"); end;
+function gui.Shape:setStrokeJoin(v) _gui_shapeSetStrokeCap(self.handle, v); end;			
+
+function gui.Shape:getStrokeDash() return _obj_getProp(self.handle, "Stroke.Dash"); end;
+function gui.Shape:setStrokeDash(v) _gui_shapeSetStrokeCap(self.handle, v); end;	
+
+gui.Shape.props["color"] = {setter="setColor", getter="getColor", tipo="color"};
+gui.Shape.props["strokeColor"] = {setter="setStrokeColor", getter="getStrokeColor", tipo="color"};
+gui.Shape.props["strokeSize"] = {setter="setStrokeSize", getter="getStrokeSize", tipo="double"};	
+
+gui.Shape.props["strokeCap"] = {setter="setStrokeCap", getter="getStrokeCap", tipo="enum",
+						   values={"flat", "round"}};		
+						   
+gui.Shape.props["strokeJoin"] = {setter="setStrokeJoin", getter="getStrokeJoin", tipo="enum",
+						   values={"miter", "round", "bevel"}};
+
+gui.Shape.props["strokeDash"] = {setter="setStrokeDash", getter="getStrokeDash", tipo="enum",
+						   values={"solid", "dash", "dot", "dashDot", "dashDotDot"}};	
+
+local function shapeFromHandle(handle)
+	local ctrl = gui.Shape.fromHandle(handle);								
 	return ctrl;	
 end
 
 --[[ Objeto Rectangle ]]--
 
+gui.Rectangle = gui.Shape.inherit();
+
+function gui.Rectangle:getCorners() return _obj_getProp(self.handle, "Corners"); end;
+function gui.Rectangle:setCorners(corners) _obj_setProp(self.handle, "Corners", corners); end;
+
+function gui.Rectangle:getCornerType() return _obj_getProp(self.handle, "CornerType"); end;
+function gui.Rectangle:setCornerType(cornerType) _obj_setProp(self.handle, "CornerType", cornerType); end;
+
+function gui.Rectangle:getSides() return _obj_getProp(self.handle, "CornerType"); end;
+function gui.Rectangle:setSides(sides) _obj_setProp(self.handle, "Sides", sides); end;	
+
+function gui.Rectangle:getXradius() return _obj_getProp(self.handle, "XRadius"); end;
+function gui.Rectangle:setXradius(xradius) _obj_setProp(self.handle, "XRadius", xradius); end;		
+
+function gui.Rectangle:getYradius() return _obj_getProp(self.handle, "YRadius"); end;
+function gui.Rectangle:setYradius(yradius) _obj_setProp(self.handle, "YRadius", yradius); end;			
+			
+gui.Rectangle.props["corners"] = {setter="setCorners", getter="getCorners", tipo="set", 
+						 values={"topLeft", "topRight", "bottomLeft", "bottomRight"}};
+
+gui.Rectangle.props["cornerType"] = {setter="setCornerType", getter="getCornerType", tipo="enum", 
+							values={"round", "bevel", "innerRound", "innerLine"}};
+							
+gui.Rectangle.props["sides"] = {setter="setSides", getter="getSides", tipo="set", 
+					   values={"top", "left", "bottom", "right"}};		
+					   
+gui.Rectangle.props["xradius"] = {setter="setXradius", getter="getXradius", tipo="double"};						   
+gui.Rectangle.props["yradius"] = {setter="setYradius", getter="getYradius", tipo="double"};		
+
 local function rectangleFromHandle(handle)
-	local ctrl = shapeFromHandle(handle);	
-		
-	function ctrl:getCorners() return _obj_getProp(self.handle, "Corners"); end;
-	function ctrl:setCorners(corners) _obj_setProp(self.handle, "Corners", corners); end;
-	
-	function ctrl:getCornerType() return _obj_getProp(self.handle, "CornerType"); end;
-	function ctrl:setCornerType(cornerType) _obj_setProp(self.handle, "CornerType", cornerType); end;
-	
-	function ctrl:getSides() return _obj_getProp(self.handle, "CornerType"); end;
-	function ctrl:setSides(sides) _obj_setProp(self.handle, "Sides", sides); end;	
-	
-	function ctrl:getXradius() return _obj_getProp(self.handle, "XRadius"); end;
-	function ctrl:setXradius(xradius) _obj_setProp(self.handle, "XRadius", xradius); end;		
-	
-	function ctrl:getYradius() return _obj_getProp(self.handle, "YRadius"); end;
-	function ctrl:setYradius(yradius) _obj_setProp(self.handle, "YRadius", yradius); end;			
-				
-	ctrl.props["corners"] = {setter="setCorners", getter="getCorners", tipo="set", 
-							 values={"topLeft", "topRight", "bottomLeft", "bottomRight"}};
-	
-	ctrl.props["cornerType"] = {setter="setCornerType", getter="getCornerType", tipo="enum", 
-							    values={"round", "bevel", "innerRound", "innerLine"}};
-								
-	ctrl.props["sides"] = {setter="setSides", getter="getSides", tipo="set", 
-						   values={"top", "left", "bottom", "right"}};		
-						   
-	ctrl.props["xradius"] = {setter="setXradius", getter="getXradius", tipo="double"};						   
-	ctrl.props["yradius"] = {setter="setYradius", getter="getYradius", tipo="double"};						   							 				
+	local ctrl = gui.Rectangle.fromHandle(handle);							   							 			
 	return ctrl;	
 end
 
@@ -1184,25 +1205,28 @@ guiLoaders["rectangle"] = rectangleFromHandle;
 
 --[[ Objeto Path ]]--
 
+gui.Path = gui.Shape.inherit();
+
+function gui.Path:getPathData() return _obj_getProp(self.handle, "PathData"); end;
+function gui.Path:setPathData(v) _obj_setProp(self.handle, "PathData", v); end;
+
+function gui.Path:getMode() return _obj_getProp(self.handle, "WrapMode"); end;
+function gui.Path:setMode(v) _obj_setProp(self.handle, "WrapMode", v); end;	
+
+function gui.Path:getRoundToPixel() return _obj_getProp(self.handle, "RoundToPixels"); end;
+function gui.Path:setRoundToPixel(v) _obj_setProp(self.handle, "RoundToPixels", v); end;		
+								   
+gui.Path.props["data"] = {setter="setPathData", getter="getPathData", tipo="string"};						   
+gui.Path.props["pathData"] = gui.Path.props["data"]
+
+gui.Path.props["mode"] = {setter="setMode", getter="getMode", tipo="enum",
+					      values={"original", "fit", "stretch", "tile"}};	
+					  
+gui.Path.props["wrapMode"] = gui.Path.props["mode"]				   							 										  
+gui.Path.props["roundToPixel"] = {setter="setRoundToPixel", getter="getRoundToPixel", tipo="bool"};
+
 local function pathFromHandle(handle)
-	local ctrl = shapeFromHandle(handle);	
-		
-	function ctrl:getPathData() return _obj_getProp(self.handle, "PathData"); end;
-	function ctrl:setPathData(v) _obj_setProp(self.handle, "PathData", v); end;
-	
-	function ctrl:getMode() return _obj_getProp(self.handle, "WrapMode"); end;
-	function ctrl:setMode(v) _obj_setProp(self.handle, "WrapMode", v); end;	
-	
-	function ctrl:getRoundToPixel() return _obj_getProp(self.handle, "RoundToPixels"); end;
-	function ctrl:setRoundToPixel(v) _obj_setProp(self.handle, "RoundToPixels", v); end;		
-									   
-	ctrl.props["data"] = {setter="setPathData", getter="getPathData", tipo="string"};						   
-	ctrl.props["pathData"] = ctrl.props["data"];
-	
-	ctrl.props["mode"] = {setter="setMode", getter="getMode", tipo="enum",
-						  values={"original", "fit", "stretch", "tile"}};						   							 				
-	ctrl.props["wrapMode"] = ctrl.props["mode"];					   							 										  
-	ctrl.props["roundToPixel"] = {setter="setRoundToPixel", getter="getRoundToPixel", tipo="bool"};						   							 					
+	local ctrl = gui.Path.fromHandle(handle);								   							 				
 	return ctrl;	
 end
 
@@ -1228,22 +1252,23 @@ guiLoaders["horzLine"] = horzLineFromHandle;
 
 --[[ Objeto Frame ]]--
 
-local function frameFromHandle(handle)
-	local ctrl = layoutFromHandle(handle);	
-		
-	function ctrl:getURL() return _obj_getProp(self.handle, "FrameURL"); end;
-	function ctrl:setURL(url) _obj_setProp(self.handle, "FrameURL", url); end;			
-	
-	function ctrl:getFrameStyle() return _obj_getProp(self.handle, "FrameURL"); end;
-	function ctrl:setFrameStyle(frameStyle) _obj_setProp(self.handle, "FrameURL", frameStyle); end;				
-	
-	function ctrl:getSrc() return _obj_getProp(self.handle, "FrameURL"); end;
-	function ctrl:setSrc(url) _obj_setProp(self.handle, "FrameURL", url); end;					
-					
+gui.Frame = gui.Layout.inherit();
 
-	ctrl.props["url"] = {setter="setURL", getter="getURL", tipo="url"};
-	ctrl.props["frameStyle"] = {setter="setFrameStyle", getter="getFrameStyle", tipo="url"};	
-	ctrl.props["src"] = {setter="setSrc", getter="getSrc", tipo="url"};		
+function gui.Frame:getURL() return _obj_getProp(self.handle, "FrameURL"); end;
+function gui.Frame:setURL(url) _obj_setProp(self.handle, "FrameURL", url); end;			
+
+function gui.Frame:getFrameStyle() return _obj_getProp(self.handle, "FrameURL"); end;
+function gui.Frame:setFrameStyle(frameStyle) _obj_setProp(self.handle, "FrameURL", frameStyle); end;				
+
+function gui.Frame:getSrc() return _obj_getProp(self.handle, "FrameURL"); end;
+function gui.Frame:setSrc(url) _obj_setProp(self.handle, "FrameURL", url); end;								
+
+gui.Frame.props["url"] = {setter="setURL", getter="getURL", tipo="url"};
+gui.Frame.props["frameStyle"] = {setter="setFrameStyle", getter="getFrameStyle", tipo="url"};	
+gui.Frame.props["src"] = {setter="setSrc", getter="getSrc", tipo="url"};		
+
+local function frameFromHandle(handle)
+	local ctrl = layoutFromHandle(handle);			
 	return ctrl;	
 end
 
@@ -1256,34 +1281,36 @@ guiLoaders["frame"] = frameFromHandle;
 
 --[[ Objeto DataLink ]]--
 
+gui.DataLink = objs.HierarchyObject.inherit();
+
+function gui.DataLink:getField() return _obj_getProp(self.handle, "FieldName"); end;
+function gui.DataLink:setField(v) return _obj_setProp(self.handle, "FieldName", v); end;
+
+function gui.DataLink:getFields() return _obj_getProp(self.handle, "Fields"); end;
+function gui.DataLink:setFields(v) return _obj_setProp(self.handle, "Fields", v); end;	
+
+function gui.DataLink:getDefaultValue() return _obj_getProp(self.handle, "DefaultValue"); end;
+function gui.DataLink:setDefaultValue(v) return _obj_setProp(self.handle, "DefaultValue", v); end;		
+
+function gui.DataLink:getDefaultValues() return _obj_getProp(self.handle, "DefaultValues"); end;
+function gui.DataLink:setDefaultValues(v) return _obj_setProp(self.handle, "DefaultValues", v); end;			
+
+function gui.DataLink:beginUpdate() end;
+function gui.DataLink:endUpdate() end;
+				
+gui.DataLink.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
+gui.DataLink.props["fields"] = {setter = "setFields", getter = "getFields", tipo = "table"};			
+gui.DataLink.props["defaultValue"] = {setter = "setDefaultValue", getter = "getDefaultValue", tipo = "string"};		
+gui.DataLink.props["defaultValues"] = {setter = "setDefaultValues", getter = "getDefaultValues", tipo = "table"};			
+
+gui.DataLink.eves["onChange"] = "field, oldValue, newValue";
+gui.DataLink.eves["onPersistedChange"] = "field, oldValue, newValue";		
+gui.DataLink.eves["onUserChange"] = "field, oldValue, newValue";	
+gui.DataLink.eves["onChildAdded"] = "node";
+gui.DataLink.eves["onChildRemoved"] = "node";
+
 local function dataLinkFromHandle(handle)
-	local ctrl = objs.hierarchyObjectFromHandle(handle);		
-	
-	function ctrl:getField() return _obj_getProp(self.handle, "FieldName"); end;
-	function ctrl:setField(v) return _obj_setProp(self.handle, "FieldName", v); end;
-	
-	function ctrl:getFields() return _obj_getProp(self.handle, "Fields"); end;
-	function ctrl:setFields(v) return _obj_setProp(self.handle, "Fields", v); end;	
-	
-	function ctrl:getDefaultValue() return _obj_getProp(self.handle, "DefaultValue"); end;
-	function ctrl:setDefaultValue(v) return _obj_setProp(self.handle, "DefaultValue", v); end;		
-	
-	function ctrl:getDefaultValues() return _obj_getProp(self.handle, "DefaultValues"); end;
-	function ctrl:setDefaultValues(v) return _obj_setProp(self.handle, "DefaultValues", v); end;			
-	
-	function ctrl:beginUpdate() end;
-	function ctrl:endUpdate() end;
-					
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
-	ctrl.props["fields"] = {setter = "setFields", getter = "getFields", tipo = "table"};			
-	ctrl.props["defaultValue"] = {setter = "setDefaultValue", getter = "getDefaultValue", tipo = "string"};		
-	ctrl.props["defaultValues"] = {setter = "setDefaultValues", getter = "getDefaultValues", tipo = "table"};			
-	
-	ctrl.eves["onChange"] = "field, oldValue, newValue";
-	ctrl.eves["onPersistedChange"] = "field, oldValue, newValue";		
-	ctrl.eves["onUserChange"] = "field, oldValue, newValue";	
-	ctrl.eves["onChildAdded"] = "node";
-	ctrl.eves["onChildRemoved"] = "node";
+	local ctrl = gui.DataLink.fromHandle(handle);			
 	return ctrl;	
 end
 
@@ -1293,88 +1320,89 @@ end;
 
 guiLoaders["dataLink"] = dataLinkFromHandle;
 
-
 --[[ Objeto Record List ]]--
 
-local function recordListFromHandle(handle)
-	local ctrl = layoutFromHandle(handle);
-	
-	function ctrl:getField() return _obj_getProp(self.handle, "FieldName"); end;
-	function ctrl:setField(v) _obj_setProp(self.handle, "FieldName", v) end;		
-	
-	function ctrl:getItemHeight() return _obj_getProp(self.handle, "ItemHeight"); end;
-	function ctrl:setItemHeight(v) _obj_setProp(self.handle, "ItemHeight", v) end;			
-	
-	function ctrl:getMinHeight() return _obj_getProp(self.handle, "MinHeight"); end;
-	function ctrl:setMinHeight(v) _obj_setProp(self.handle, "MinHeight", v) end;		
-	
-	function ctrl:getMinQt() return _obj_getProp(self.handle, "MinQt"); end;
-	function ctrl:setMinQt(v) _obj_setProp(self.handle, "MinQt", v) end;			
-	
-	function ctrl:getAutoHeight() return _obj_getProp(self.handle, "AutoHeight"); end;
-	function ctrl:setAutoHeight(v) _obj_setProp(self.handle, "AutoHeight", v) end;			
-	
-	function ctrl:getTemplateForm() return _obj_getProp(self.handle, "TemplateForm"); end;
-	function ctrl:setTemplateForm(v) _obj_setProp(self.handle, "TemplateForm", v); end;			
-	
-	function ctrl:getLayout() return _obj_getProp(self.handle, "RecordListLayout"); end;
-	function ctrl:setLayout(v) _obj_setProp(self.handle, "RecordListLayout", v); end;	
-	
-	function ctrl:getSelectable() return _obj_getProp(self.handle, "SelectableList"); end;
-	function ctrl:setSelectable(v) _obj_setProp(self.handle, "SelectableList", v); end;	
-	
-	function ctrl:append() return ndb.openNodeFacade(_obj_invokeEx(self.handle, "AppendItemEx")); end;
-	
-	function ctrl:getSelectedNode() return ndb.openNodeFacade(_gui_recordListGetSelectedNodeHandle(self.handle)); end;	
-	function ctrl:setSelectedNode(node) _gui_recordListSetSelectedNodeHandle(self.handle, ndb.getNodeHandle(node)); end;
+gui.RecordList = gui.Layout.inherit();
 
-	function ctrl:getSelectedForm() return objs.tryFindFromHandle(_gui_recordListGetSelectedFormHandle(self.handle)); end;
-	
-	function ctrl:scrollToNode(node) _gui_recordListScrollToNodeHandle(self.handle, ndb.getNodeHandle(node)); end;
-	function ctrl:sort() _obj_invoke(self.handle, "ReorganizarItens"); end;
-	
-	function ctrl:getChildren()
-		local ret = {};
-		local childCount = _obj_getProp(self.handle, "ChildFormCount");
-		local child;
-		local childHandle;
-		local idxDest = 1;
-			
-		for i = 0, childCount - 1, 1 do
-			childHandle = _gui_rcl_getChild(self.handle, i);
-			
-			if (childHandle ~= nil) then							
-				child = gui.fromHandle(childHandle);
-				
-				if (type(child) == "table") then							
-					ret[idxDest] = child;
-					idxDest = idxDest + 1;
-				end
-			end;	
-		end
+function gui.RecordList:getField() return _obj_getProp(self.handle, "FieldName"); end;
+function gui.RecordList:setField(v) _obj_setProp(self.handle, "FieldName", v) end;		
+
+function gui.RecordList:getItemHeight() return _obj_getProp(self.handle, "ItemHeight"); end;
+function gui.RecordList:setItemHeight(v) _obj_setProp(self.handle, "ItemHeight", v) end;			
+
+function gui.RecordList:getMinHeight() return _obj_getProp(self.handle, "MinHeight"); end;
+function gui.RecordList:setMinHeight(v) _obj_setProp(self.handle, "MinHeight", v) end;		
+
+function gui.RecordList:getMinQt() return _obj_getProp(self.handle, "MinQt"); end;
+function gui.RecordList:setMinQt(v) _obj_setProp(self.handle, "MinQt", v) end;			
+
+function gui.RecordList:getAutoHeight() return _obj_getProp(self.handle, "AutoHeight"); end;
+function gui.RecordList:setAutoHeight(v) _obj_setProp(self.handle, "AutoHeight", v) end;			
+
+function gui.RecordList:getTemplateForm() return _obj_getProp(self.handle, "TemplateForm"); end;
+function gui.RecordList:setTemplateForm(v) _obj_setProp(self.handle, "TemplateForm", v); end;			
+
+function gui.RecordList:getLayout() return _obj_getProp(self.handle, "RecordListLayout"); end;
+function gui.RecordList:setLayout(v) _obj_setProp(self.handle, "RecordListLayout", v); end;	
+
+function gui.RecordList:getSelectable() return _obj_getProp(self.handle, "SelectableList"); end;
+function gui.RecordList:setSelectable(v) _obj_setProp(self.handle, "SelectableList", v); end;	
+
+function gui.RecordList:append() return ndb.openNodeFacade(_obj_invokeEx(self.handle, "AppendItemEx")); end;
+
+function gui.RecordList:getSelectedNode() return ndb.openNodeFacade(_gui_recordListGetSelectedNodeHandle(self.handle)); end;	
+function gui.RecordList:setSelectedNode(node) _gui_recordListSetSelectedNodeHandle(self.handle, ndb.getNodeHandle(node)); end;
+
+function gui.RecordList:getSelectedForm() return objs.tryFindFromHandle(_gui_recordListGetSelectedFormHandle(self.handle)); end;
+
+function gui.RecordList:scrollToNode(node) _gui_recordListScrollToNodeHandle(self.handle, ndb.getNodeHandle(node)); end;
+function gui.RecordList:sort() _obj_invoke(self.handle, "ReorganizarItens"); end;
+
+function gui.RecordList:getChildren()
+	local ret = {};
+	local childCount = _obj_getProp(self.handle, "ChildFormCount");
+	local child;
+	local childHandle;
+	local idxDest = 1;
 		
-		return ret;
-	end;
+	for i = 0, childCount - 1, 1 do
+		childHandle = _gui_rcl_getChild(self.handle, i);
+		
+		if (childHandle ~= nil) then							
+			child = gui.fromHandle(childHandle);
+			
+			if (type(child) == "table") then							
+				ret[idxDest] = child;
+				idxDest = idxDest + 1;
+			end
+		end;	
+	end
 	
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
-	ctrl.props["templateForm"] = {setter = "setTemplateForm", getter = "getTemplateForm", tipo = "string"};				
-	ctrl.props["itemHeight"] = {setter = "setItemHeight", getter = "getItemHeight", tipo = "double"};					
-	ctrl.props["minHeight"] = {setter = "setMinHeight", getter = "getMinHeight", tipo = "double"};						
-	ctrl.props["autoHeight"] = {setter = "setAutoHeight", getter = "getAutoHeight", tipo = "bool"};		
-	ctrl.props["minQt"] = {setter = "setMinQt", getter = "getMinQt", tipo = "int"};		
-	ctrl.props["layout"] = {setter = "setLayout", getter = "getLayout", tipo = "enum",
-							values = {"vertical", "horizontal", "horizontalTiles", "verticalTiles"}};			
-	ctrl.props["selectable"] = {setter = "setSelectable", getter = "getSelectable", tipo = "bool"};		
-	
-	ctrl.props["selectedNode"] = {getter = "getSelectedNode", setter="setSelectedNode", tipo = "table"};		
-	ctrl.props["selectedForm"] = {getter = "getSelectedForm", tipo = "table"};		
+	return ret;
+end;
 
-	ctrl.eves["onSelect"] = "";
-	ctrl.eves["onBeginEnumeration"] = "";
-	ctrl.eves["onItemAdded"] = "node, form";
-	ctrl.eves["onItemRemoved"] = "node, form";
-	ctrl.eves["onEndEnumeration"] = "";
-	ctrl.eves["onCompare"] = "nodeA, nodeB";
+gui.RecordList.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
+gui.RecordList.props["templateForm"] = {setter = "setTemplateForm", getter = "getTemplateForm", tipo = "string"};				
+gui.RecordList.props["itemHeight"] = {setter = "setItemHeight", getter = "getItemHeight", tipo = "double"};					
+gui.RecordList.props["minHeight"] = {setter = "setMinHeight", getter = "getMinHeight", tipo = "double"};						
+gui.RecordList.props["autoHeight"] = {setter = "setAutoHeight", getter = "getAutoHeight", tipo = "bool"};		
+gui.RecordList.props["minQt"] = {setter = "setMinQt", getter = "getMinQt", tipo = "int"};		
+gui.RecordList.props["layout"] = {setter = "setLayout", getter = "getLayout", tipo = "enum",
+						values = {"vertical", "horizontal", "horizontalTiles", "verticalTiles"}};			
+gui.RecordList.props["selectable"] = {setter = "setSelectable", getter = "getSelectable", tipo = "bool"};		
+
+gui.RecordList.props["selectedNode"] = {getter = "getSelectedNode", setter="setSelectedNode", tipo = "table"};		
+gui.RecordList.props["selectedForm"] = {getter = "getSelectedForm", tipo = "table"};		
+
+gui.RecordList.eves["onSelect"] = "";
+gui.RecordList.eves["onBeginEnumeration"] = "";
+gui.RecordList.eves["onItemAdded"] = "node, form";
+gui.RecordList.eves["onItemRemoved"] = "node, form";
+gui.RecordList.eves["onEndEnumeration"] = "";
+gui.RecordList.eves["onCompare"] = "nodeA, nodeB";
+
+local function recordListFromHandle(handle)
+	local ctrl = gui.RecordList.fromHandle(handle);	
 	return ctrl;	
 end
 
@@ -1384,31 +1412,27 @@ end;
 
 guiLoaders["recordList"] = recordListFromHandle;
 
-
 --[[ Objeto DataScopeBox ]]--
 
+gui.DataScopeBox = gui.Layout.inherit();
+
+function gui.DataScopeBox:getNodeObject() return rawget(self, "__nodeObject"); end;
+
+function gui.DataScopeBox:setNodeObject(nodeObject) 
+	rawset(self, "__nodeObject", nodeObject);
+	_gui_assignNodeObject(self.handle, ndb.getNodeHandle(nodeObject));
+end;	
+
+gui.DataScopeBox.props["scopeNode"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};		
+gui.DataScopeBox.props["nodeObject"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};		
+gui.DataScopeBox.props["node"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};		
+
+gui.DataScopeBox.eves["onNodeReady"] = "";
+gui.DataScopeBox.eves["onNodeUnready"] = "";
+gui.DataScopeBox.eves["onNodeChanged"] = "";
+
 local function dataScopeBoxFromHandle(handle)
-	local ctrl = layoutFromHandle(handle);
-	
-	function ctrl:getNodeObject() return rawget(self, "__nodeObject"); end;
-	
-	function ctrl:setNodeObject(nodeObject) 
-		rawset(self, "__nodeObject", nodeObject);
-		_gui_assignNodeObject(self.handle, ndb.getNodeHandle(nodeObject));
-	end;	
-	
-	ctrl.props["scopeNode"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};		
-	ctrl.props["nodeObject"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};		
-	ctrl.props["node"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};		
-	
-	if ctrl.eves == nil then
-		ctrl.eves = {};
-	end;
-	
-	ctrl.eves["onNodeReady"] = "";
-	ctrl.eves["onNodeUnready"] = "";
-	ctrl.eves["onNodeChanged"] = "";
-	
+	local ctrl = gui.DataScopeBox.fromHandle(handle);
 	return ctrl;	
 end
 
@@ -1420,77 +1444,79 @@ guiLoaders["dataScopeBox"] = dataScopeBoxFromHandle;
 
 --[[ Objeto RichEdit ]]--
 
+gui.RichEdit = gui.Control.inherit();
+
+function gui.RichEdit:getField() return _gui_getFieldName(self.handle); end;
+function gui.RichEdit:setField(v) _gui_setFieldName(self.handle, v); end;
+
+function gui.RichEdit:beginEdit() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LBeginEdit") end; end;
+function gui.RichEdit:endEdit() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEndEdit") end; end;
+
+function gui.RichEdit:selectAll() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LSelectAll") end; end;
+function gui.RichEdit:unselect() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LUnselect") end; end;	
+function gui.RichEdit:getSelectionPosInChars() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionPosInChars"); else return 0, 0; end; end;
+function gui.RichEdit:getSelectionPosInGlyphs() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionPosInGlyphs"); else return 0, 0; end; end;	
+function gui.RichEdit:getIsSelectionForward() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetIsSelectionForward"); else return true; end; end;
+function gui.RichEdit:getSelectionText() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionText"); else return ""; end; end;		
+function gui.RichEdit:getSelectionURL() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionURL"); else return ""; end; end;			
+function gui.RichEdit:getSelectionFontColor() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontColor"); else return "Black"; end; end;
+function gui.RichEdit:getSelectionFontBkgColor() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontBkgColor"); else return "White"; end; end;
+function gui.RichEdit:getSelectionFontSize() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontSize"); else return 14; end; end;
+function gui.RichEdit:getSelectionFontFamily() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontFamily"); else return "Roboto"; end; end;
+function gui.RichEdit:getSelectionFontStyle() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontStyle"); else return {}; end; end;
+function gui.RichEdit:getSelectionFloat() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFloat"); else return "none"; end; end;
+function gui.RichEdit:getSelectionParaAlign() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionParaAlign"); else return "left"; end; end;
+	
+function gui.RichEdit:gotoStart(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoStart", holdSelection); end; end;
+function gui.RichEdit:gotoEnd(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoEnd", holdSelection); end; end;
+function gui.RichEdit:gotoNext(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoNext", holdSelection); end; end;
+function gui.RichEdit:gotoPrevious(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPrevious", holdSelection); end; end;
+function gui.RichEdit:gotoStartOfLine(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoStartOfLine", holdSelection); end; end;
+function gui.RichEdit:gotoEndOfLine(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoEndOfLine", holdSelection); end; end;
+function gui.RichEdit:gotoNextWord(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoNextWord", holdSelection); end; end;
+function gui.RichEdit:gotoPreviousWord(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPreviousWord", holdSelection); end; end;
+function gui.RichEdit:gotoLineUp(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoLineUp", holdSelection); end; end;
+function gui.RichEdit:gotoLineDown(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoLineDown", holdSelection); end; end;
+function gui.RichEdit:gotoPageUp(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPageUp", holdSelection); end; end;
+function gui.RichEdit:gotoPageDown(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPageDown", holdSelection); end; end;
+function gui.RichEdit:gotoPositionInGlyphs(pos, holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPositionInGlyphs", pos, holdSelection); end; end;
+function gui.RichEdit:gotoPositionInChars(pos, holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPositionInChars", pos, holdSelection); end; end;
+
+function gui.RichEdit:copySelectionToClipboard() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LCopySelectionToClipboard"); end; end;
+
+function gui.RichEdit:deleteSelection() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_DeleteSelection"); end; end;		
+function gui.RichEdit:insertText(text) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_InsertText", text); end; end;
+function gui.RichEdit:insertTalemark(talemarkText, talemarkOptions, talemarkSheetStyle) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_InsertTalemark", talemarkText, talemarkOptions, talemarkSheetStyle); end; end;
+function gui.RichEdit:insertImage(params) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_InsertImage", params); end; end;
+function gui.RichEdit:breakLine() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_BreakLine"); end; end;
+function gui.RichEdit:breakParagraph() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_BreakParagraph"); end; end;
+function gui.RichEdit:indent(qty) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_Indent", qty); end; end;
+function gui.RichEdit:pasteFromClipboard() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_PasteFromClipboard"); end; end;
+function gui.RichEdit:cutSelectionToClipboard() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_CutSelectionToClipboard"); end; end;
+function gui.RichEdit:setSelectionURL(url) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionURL", url); end; end;
+function gui.RichEdit:setSelectionFontColor(color) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontColor", color); end; end;
+function gui.RichEdit:setSelectionFontBkgColor(color) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontBkgColor", color); end; end;
+function gui.RichEdit:setSelectionFontSize(size) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontSize", size); end; end;
+function gui.RichEdit:setSelectionFontFamily(family) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontFamily", family); end; end;
+function gui.RichEdit:setSelectionFontStyle(style) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontStyle", style); end; end;
+function gui.RichEdit:setSelectionFloat(floatMode) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFloat", floatMode); end; end;
+function gui.RichEdit:setSelectionParaAlign(paraAlign) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionParaAlign", paraAlign); end; end;
+	
+function gui.RichEdit:getLengthInChars() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetLengthInChars"); else return 0; end; end;		
+function gui.RichEdit:getLengthInGlyphs() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetLengthInGlyphs"); else return 0; end; end;
+function gui.RichEdit:getText() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetText"); else return ""; end; end;	
+		
+gui.RichEdit.props["animateImages"] = {readProp = "CanAnimateImages", writeProp = "CanAnimateImages", tipo = "bool"};			
+gui.RichEdit.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
+gui.RichEdit.props["backgroundColor"] = {readProp = "BackgroundColor", writeProp = "BackgroundColor", tipo = "color"};
+gui.RichEdit.props["defaultFontColor"] = {readProp = "DefaultFontColor", writeProp = "DefaultFontColor", tipo = "color"};
+gui.RichEdit.props["defaultFontSize"] = {readProp = "DefaultFontSize", writeProp = "DefaultFontSize", tipo = "double"};	
+gui.RichEdit.props["showToolbar"] = {readProp = "ShowToolbar", writeProp = "ShowToolbar", tipo = "bool"};
+gui.RichEdit.props["readOnly"] = {readProp = "ReadOnly", writeProp = "ReadOnly", tipo = "bool"};
+gui.RichEdit.props["hideSelection"] = {readProp = "HideSelectionNoFocus", writeProp = "HideSelectionNoFocus", tipo = "bool"};
+
 local function richEditFromHandle(handle)
-	local ctrl = controlFromHandle(handle);
-	
-	function ctrl:getField() return _gui_getFieldName(self.handle); end;
-	function ctrl:setField(v) _gui_setFieldName(self.handle, v); end;
-	
-	function ctrl:beginEdit() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LBeginEdit") end; end;
-	function ctrl:endEdit() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEndEdit") end; end;
-	
-	function ctrl:selectAll() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LSelectAll") end; end;
-	function ctrl:unselect() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LUnselect") end; end;	
-	function ctrl:getSelectionPosInChars() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionPosInChars"); else return 0, 0; end; end;
-	function ctrl:getSelectionPosInGlyphs() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionPosInGlyphs"); else return 0, 0; end; end;	
-	function ctrl:getIsSelectionForward() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetIsSelectionForward"); else return true; end; end;
-	function ctrl:getSelectionText() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionText"); else return ""; end; end;		
-	function ctrl:getSelectionURL() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionURL"); else return ""; end; end;			
-	function ctrl:getSelectionFontColor() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontColor"); else return "Black"; end; end;
-	function ctrl:getSelectionFontBkgColor() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontBkgColor"); else return "White"; end; end;
-	function ctrl:getSelectionFontSize() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontSize"); else return 14; end; end;
-	function ctrl:getSelectionFontFamily() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontFamily"); else return "Roboto"; end; end;
-	function ctrl:getSelectionFontStyle() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFontStyle"); else return {}; end; end;
-	function ctrl:getSelectionFloat() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionFloat"); else return "none"; end; end;
-	function ctrl:getSelectionParaAlign() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetSelectionParaAlign"); else return "left"; end; end;
-		
-	function ctrl:gotoStart(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoStart", holdSelection); end; end;
-	function ctrl:gotoEnd(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoEnd", holdSelection); end; end;
-	function ctrl:gotoNext(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoNext", holdSelection); end; end;
-	function ctrl:gotoPrevious(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPrevious", holdSelection); end; end;
-	function ctrl:gotoStartOfLine(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoStartOfLine", holdSelection); end; end;
-	function ctrl:gotoEndOfLine(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoEndOfLine", holdSelection); end; end;
-	function ctrl:gotoNextWord(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoNextWord", holdSelection); end; end;
-	function ctrl:gotoPreviousWord(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPreviousWord", holdSelection); end; end;
-	function ctrl:gotoLineUp(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoLineUp", holdSelection); end; end;
-	function ctrl:gotoLineDown(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoLineDown", holdSelection); end; end;
-	function ctrl:gotoPageUp(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPageUp", holdSelection); end; end;
-	function ctrl:gotoPageDown(holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPageDown", holdSelection); end; end;
-	function ctrl:gotoPositionInGlyphs(pos, holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPositionInGlyphs", pos, holdSelection); end; end;
-	function ctrl:gotoPositionInChars(pos, holdSelection) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGotoPositionInChars", pos, holdSelection); end; end;
-	
-	function ctrl:copySelectionToClipboard() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LCopySelectionToClipboard"); end; end;
-	
-	function ctrl:deleteSelection() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_DeleteSelection"); end; end;		
-	function ctrl:insertText(text) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_InsertText", text); end; end;
-	function ctrl:insertTalemark(talemarkText, talemarkOptions, talemarkSheetStyle) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_InsertTalemark", talemarkText, talemarkOptions, talemarkSheetStyle); end; end;
-	function ctrl:insertImage(params) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_InsertImage", params); end; end;
-	function ctrl:breakLine() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_BreakLine"); end; end;
-	function ctrl:breakParagraph() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_BreakParagraph"); end; end;
-	function ctrl:indent(qty) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_Indent", qty); end; end;
-	function ctrl:pasteFromClipboard() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_PasteFromClipboard"); end; end;
-	function ctrl:cutSelectionToClipboard() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_CutSelectionToClipboard"); end; end;
-	function ctrl:setSelectionURL(url) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionURL", url); end; end;
-	function ctrl:setSelectionFontColor(color) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontColor", color); end; end;
-	function ctrl:setSelectionFontBkgColor(color) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontBkgColor", color); end; end;
-	function ctrl:setSelectionFontSize(size) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontSize", size); end; end;
-	function ctrl:setSelectionFontFamily(family) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontFamily", family); end; end;
-	function ctrl:setSelectionFontStyle(style) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFontStyle", style); end; end;
-	function ctrl:setSelectionFloat(floatMode) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionFloat", floatMode); end; end;
-	function ctrl:setSelectionParaAlign(paraAlign) if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LEditOp_SetSelectionParaAlign", paraAlign); end; end;
-		
-	function ctrl:getLengthInChars() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetLengthInChars"); else return 0; end; end;		
-	function ctrl:getLengthInGlyphs() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetLengthInGlyphs"); else return 0; end; end;
-	function ctrl:getText() if System.checkAPIVersion(87, 4) then return _obj_invokeEx(self.handle, "LGetText"); else return ""; end; end;	
-			
-	ctrl.props["animateImages"] = {readProp = "CanAnimateImages", writeProp = "CanAnimateImages", tipo = "bool"};			
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
-	ctrl.props["backgroundColor"] = {readProp = "BackgroundColor", writeProp = "BackgroundColor", tipo = "color"};
-	ctrl.props["defaultFontColor"] = {readProp = "DefaultFontColor", writeProp = "DefaultFontColor", tipo = "color"};
-	ctrl.props["defaultFontSize"] = {readProp = "DefaultFontSize", writeProp = "DefaultFontSize", tipo = "double"};	
-	ctrl.props["showToolbar"] = {readProp = "ShowToolbar", writeProp = "ShowToolbar", tipo = "bool"};
-	ctrl.props["readOnly"] = {readProp = "ReadOnly", writeProp = "ReadOnly", tipo = "bool"};
-	ctrl.props["hideSelection"] = {readProp = "HideSelectionNoFocus", writeProp = "HideSelectionNoFocus", tipo = "bool"};	
+	local ctrl = gui.RichEdit.fromHandle(handle);	
 	return ctrl;	
 end
 
@@ -1500,66 +1526,67 @@ end;
 
 guiLoaders["richEdit"] = richEditFromHandle;
 
-
 --[[ Objeto Popup ]]--
 
-local function popupFromHandle(handle)
-	local ctrl = layoutFromHandle(handle);
-	
-	function ctrl:getCancelable() return _obj_getProp(self.handle, "Cancelavel"); end;
-	function ctrl:setCancelable(v) _obj_setProp(self.handle, "Cancelavel", v) end;		
-	
-	function ctrl:getBackOpacity() return _obj_getProp(self.handle, "BackOpacity"); end;
-	function ctrl:setBackOpacity(v) _obj_setProp(self.handle, "BackOpacity", v) end;			
-	
-	function ctrl:getDrawContainer() return _obj_getProp(self.handle, "DesenharPopupContainer"); end;
-	function ctrl:setDrawContainer(v) _obj_setProp(self.handle, "DesenharPopupContainer", v) end;			
-	
-	function ctrl:setNodeObject(nodeObject) 
-		rawset(self, "nodeObject", nodeObject);
-		_gui_assignNodeObject(self.handle, ndb.getNodeHandle(nodeObject));
-	end;
-	
-	function ctrl:getNodeObject() return rawget(self, "nodeObject") end;	
-	
-	function ctrl:showPopupEx(placement, control)
-		if type(placement) ~= "string" then
-			placement = "center";
-		end;
-	
-		_obj_setProp(self.handle, "Placement", placement);
-		
-		if (type(control) == "table") and (control.handle ~= nil) then
-			_obj_setProp(self.handle, "TargetControlHandle", control.handle);
-		else
-			_obj_setProp(self.handle, "TargetControlHandle", 0);
-		end;
-		
-		_obj_invoke(self.handle, "ExibirPopup"); 
-	end;
-	
-	ctrl.show = ctrl.showPopupEx;
-	ctrl.showPopup = ctrl.showPopupEx;
-	
-	function ctrl:closePopup(cancelar, forcar) _obj_invoke(self.handle, "FecharPopup", cancelar == true, forcar == true); end;
-	function ctrl:close(cancelar, forcar) _obj_invoke(self.handle, "FecharPopup", cancelar == true, forcar == true); end;
-	
-	ctrl.props["cancelable"] = {setter = "setCancelable", getter = "getCancelable", tipo = "bool"};		
-	ctrl.props["backOpacity"] = {setter = "setBackOpacity", getter = "getBackOpacity", tipo = "double"};			
-	ctrl.props["drawContainer"] = {setter = "setDrawContainer", getter = "getDrawContainer", tipo = "bool"};				
-	ctrl.props["scopeNode"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};					
-	ctrl.props["nodeObject"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};					
-	ctrl.props["node"] = ctrl.props["nodeObject"];
-	ctrl.props["scopeNode"] = ctrl.props["nodeObject"];
-	ctrl.props["autoScopeNode"] = {writeProp = "AutoScopeNode", readProp = "AutoScopeNode", tipo = "bool"};
+gui.Popup = gui.Layout.inherit();
 
-	ctrl.eves["onClose"] = "canceled";	
-	ctrl.eves["onCanClose"] = "canceled";
-	ctrl.eves["onCalculateSize"] = "dueToResize, width, height";
+function gui.Popup:getCancelable() return _obj_getProp(self.handle, "Cancelavel"); end;
+function gui.Popup:setCancelable(v) _obj_setProp(self.handle, "Cancelavel", v) end;		
+
+function gui.Popup:getBackOpacity() return _obj_getProp(self.handle, "BackOpacity"); end;
+function gui.Popup:setBackOpacity(v) _obj_setProp(self.handle, "BackOpacity", v) end;			
+
+function gui.Popup:getDrawContainer() return _obj_getProp(self.handle, "DesenharPopupContainer"); end;
+function gui.Popup:setDrawContainer(v) _obj_setProp(self.handle, "DesenharPopupContainer", v) end;			
+
+function gui.Popup:setNodeObject(nodeObject) 
+	rawset(self, "nodeObject", nodeObject);
+	_gui_assignNodeObject(self.handle, ndb.getNodeHandle(nodeObject));
+end;
+
+function gui.Popup:getNodeObject() return rawget(self, "nodeObject") end;	
+
+function gui.Popup:showPopupEx(placement, control)
+	if type(placement) ~= "string" then
+		placement = "center";
+	end;
+
+	_obj_setProp(self.handle, "Placement", placement);
 	
-	ctrl.eves["onNodeReady"] = "";
-	ctrl.eves["onNodeUnready"] = "";
-	ctrl.eves["onNodeChanged"] = "";	
+	if (type(control) == "table") and (control.handle ~= nil) then
+		_obj_setProp(self.handle, "TargetControlHandle", control.handle);
+	else
+		_obj_setProp(self.handle, "TargetControlHandle", 0);
+	end;
+	
+	_obj_invoke(self.handle, "ExibirPopup"); 
+end;
+
+gui.Popup.show = gui.Popup.showPopupEx;
+gui.Popup.showPopup = gui.Popup.showPopupEx;
+
+function gui.Popup:closePopup(cancelar, forcar) _obj_invoke(self.handle, "FecharPopup", cancelar == true, forcar == true); end;
+function gui.Popup:close(cancelar, forcar) _obj_invoke(self.handle, "FecharPopup", cancelar == true, forcar == true); end;
+
+gui.Popup.props["cancelable"] = {setter = "setCancelable", getter = "getCancelable", tipo = "bool"};		
+gui.Popup.props["backOpacity"] = {setter = "setBackOpacity", getter = "getBackOpacity", tipo = "double"};			
+gui.Popup.props["drawContainer"] = {setter = "setDrawContainer", getter = "getDrawContainer", tipo = "bool"};				
+gui.Popup.props["scopeNode"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};					
+gui.Popup.props["nodeObject"] = {setter = "setNodeObject", getter = "getNodeObject", tipo = "table"};					
+gui.Popup.props["node"] = gui.Popup.props["nodeObject"];
+gui.Popup.props["scopeNode"] = gui.Popup.props["nodeObject"];
+gui.Popup.props["autoScopeNode"] = {writeProp = "AutoScopeNode", readProp = "AutoScopeNode", tipo = "bool"};
+
+gui.Popup.eves["onClose"] = "canceled";	
+gui.Popup.eves["onCanClose"] = "canceled";
+gui.Popup.eves["onCalculateSize"] = "dueToResize, width, height";
+
+gui.Popup.eves["onNodeReady"] = "";
+gui.Popup.eves["onNodeUnready"] = "";
+gui.Popup.eves["onNodeChanged"] = "";
+
+local function popupFromHandle(handle)
+	local ctrl = gui.Popup.fromHandle(handle);
 	return ctrl;	
 end
 
@@ -1571,46 +1598,48 @@ guiLoaders["popup"] = popupFromHandle;
 
 --[[ Objeto Progress Bar ]]--
 
+gui.ProgressBar = gui.Control.inherit();
+
+function gui.ProgressBar:getColor() return _obj_getProp(self.handle, "Color"); end;
+function gui.ProgressBar:setColor(v) _obj_setProp(self.handle, "Color", v) end;		
+
+function gui.ProgressBar:getPosition() return _obj_getProp(self.handle, "Value"); end;
+function gui.ProgressBar:setPosition(v) _obj_setProp(self.handle, "Value", v) end;		
+
+function gui.ProgressBar:getMin() return _obj_getProp(self.handle, "Min"); end;
+function gui.ProgressBar:setMin(v) _obj_setProp(self.handle, "Min", v) end;			
+
+function gui.ProgressBar:getMax() return _obj_getProp(self.handle, "Max"); end;
+function gui.ProgressBar:setMax(v) _obj_setProp(self.handle, "Max", v) end;				
+
+function gui.ProgressBar:getField() return _obj_getProp(self.handle, "Field"); end;
+function gui.ProgressBar:setField(v) _obj_setProp(self.handle, "Field", v); end;			
+
+function gui.ProgressBar:getFieldMin() return _obj_getProp(self.handle, "FieldMin"); end;
+function gui.ProgressBar:setFieldMin(v) _obj_setProp(self.handle, "FieldMin", v); end;		
+
+function gui.ProgressBar:getFieldMax() return _obj_getProp(self.handle, "FieldMax"); end;
+function gui.ProgressBar:setFieldMax(v) _obj_setProp(self.handle, "FieldMax", v); end;			
+
+function gui.ProgressBar:getMouseGlow() return _obj_getProp(self.handle, "MouseGlow"); end;
+function gui.ProgressBar:setMouseGlow(v) _obj_setProp(self.handle, "MouseGlow", v); end;				
+
+function gui.ProgressBar:getColorMode() return _obj_getProp(self.handle, "ColorMode"); end;
+function gui.ProgressBar:setColorMode(v) _obj_setProp(self.handle, "ColorMode", v); end;		
+
+gui.ProgressBar.props["color"] = {setter = "setColor", getter = "getColor", tipo = "color"};		
+gui.ProgressBar.props["position"] = {setter = "setPosition", getter = "getPosition", tipo = "double"};	
+gui.ProgressBar.props["value"] = {setter = "setPosition", getter = "getPosition", tipo = "double"};		
+gui.ProgressBar.props["min"] = {setter = "setMin", getter = "getMin", tipo = "double"};		
+gui.ProgressBar.props["max"] = {setter = "setMax", getter = "getMax", tipo = "double"};			
+gui.ProgressBar.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
+gui.ProgressBar.props["fieldMin"] = {setter = "setFieldMin", getter = "getFieldMin", tipo = "string"};		
+gui.ProgressBar.props["fieldMax"] = {setter = "setFieldMax", getter = "getFieldMax", tipo = "string"};			
+gui.ProgressBar.props["mouseGlow"] = {setter = "setMouseGlow", getter = "getMouseGlow", tipo = "bool"};	
+gui.ProgressBar.props["colorMode"] = {setter = "setColorMode", getter = "getColorMode", tipo = "enum", values={"default", "hl"}};	
+
 local function progressBarFromHandle(handle)
-	local ctrl = controlFromHandle(handle);
-	
-	function ctrl:getColor() return _obj_getProp(self.handle, "Color"); end;
-	function ctrl:setColor(v) _obj_setProp(self.handle, "Color", v) end;		
-	
-	function ctrl:getPosition() return _obj_getProp(self.handle, "Value"); end;
-	function ctrl:setPosition(v) _obj_setProp(self.handle, "Value", v) end;		
-	
-	function ctrl:getMin() return _obj_getProp(self.handle, "Min"); end;
-	function ctrl:setMin(v) _obj_setProp(self.handle, "Min", v) end;			
-	
-	function ctrl:getMax() return _obj_getProp(self.handle, "Max"); end;
-	function ctrl:setMax(v) _obj_setProp(self.handle, "Max", v) end;				
-	
-	function ctrl:getField() return _obj_getProp(self.handle, "Field"); end;
-	function ctrl:setField(v) _obj_setProp(self.handle, "Field", v); end;			
-	
-	function ctrl:getFieldMin() return _obj_getProp(self.handle, "FieldMin"); end;
-	function ctrl:setFieldMin(v) _obj_setProp(self.handle, "FieldMin", v); end;		
-	
-	function ctrl:getFieldMax() return _obj_getProp(self.handle, "FieldMax"); end;
-	function ctrl:setFieldMax(v) _obj_setProp(self.handle, "FieldMax", v); end;			
-	
-	function ctrl:getMouseGlow() return _obj_getProp(self.handle, "MouseGlow"); end;
-	function ctrl:setMouseGlow(v) _obj_setProp(self.handle, "MouseGlow", v); end;				
-	
-	function ctrl:getColorMode() return _obj_getProp(self.handle, "ColorMode"); end;
-	function ctrl:setColorMode(v) _obj_setProp(self.handle, "ColorMode", v); end;		
-	
-	ctrl.props["color"] = {setter = "setColor", getter = "getColor", tipo = "color"};		
-	ctrl.props["position"] = {setter = "setPosition", getter = "getPosition", tipo = "double"};	
-    ctrl.props["value"] = {setter = "setPosition", getter = "getPosition", tipo = "double"};		
-	ctrl.props["min"] = {setter = "setMin", getter = "getMin", tipo = "double"};		
-	ctrl.props["max"] = {setter = "setMax", getter = "getMax", tipo = "double"};			
-	ctrl.props["field"] = {setter = "setField", getter = "getField", tipo = "string"};		
-	ctrl.props["fieldMin"] = {setter = "setFieldMin", getter = "getFieldMin", tipo = "string"};		
-	ctrl.props["fieldMax"] = {setter = "setFieldMax", getter = "getFieldMax", tipo = "string"};			
-	ctrl.props["mouseGlow"] = {setter = "setMouseGlow", getter = "getMouseGlow", tipo = "bool"};	
-	ctrl.props["colorMode"] = {setter = "setColorMode", getter = "getColorMode", tipo = "enum", values={"default", "hl"}};		
+	local ctrl = gui.ProgressBar.fromHandle(handle);	
 	return ctrl;	
 end
 

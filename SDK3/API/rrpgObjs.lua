@@ -116,7 +116,7 @@ end;
 objs.class = {
 	_isClass = true,
 	
-	constructor = function(obj)
+	initialize = function(obj)
 	end,
 
 	addEventListener = function (obj, eventName, funcCallback, optionalSelfParameter)
@@ -421,17 +421,17 @@ function objs.newPureLuaObject()
 	return objs.objectFromHandle(nil);
 end;
 
-function objs.__recursiveRunConstructor(obj, class, ...)
+function objs.__recursiveRunInitialize(obj, class)
 	local superClass = class.super;
 	
 	if superClass ~= nil then
-		objs.__recursiveRunConstructor(obj, superClass, ...);
+		objs.__recursiveRunInitialize(obj, superClass);
 	end;
 	
-	local constructor = rawget(class, "constructor");
+	local initialize = rawget(class, "initialize");
 	
-	if constructor ~= nil then
-		constructor(obj, ...);
+	if initialize ~= nil then
+		initialize(obj);
 	end;
 end;
 
@@ -439,17 +439,17 @@ function objs.__createSubclass(superClass)
 	assert(superClass ~= nil);	
 	local class = {super = superClass, props = {}, eves = {}, _isClass = true};		
 		
-	class.new = function(...)
+	class.new = function()
 		local obj = {class=class};							 
 		setmetatable(obj, objectMetaTable);		
-		objs.__recursiveRunConstructor(obj, class, ...);		
+		objs.__recursiveRunInitialize(obj, class);		
 		return obj;		
 	end;		
 		
-	class.fromHandle = function(handle, ...)
+	class.fromHandle = function(handle)
 		local obj = {handle=handle, class=class};							 
 		setmetatable(obj, objectMetaTable);	
-		objs.__recursiveRunConstructor(obj, class, ...);	
+		objs.__recursiveRunInitialize(obj, class);	
 		return obj;		
 	end;
 	
@@ -468,7 +468,7 @@ objs.inherit = objs.newClass;
 
 objs.Component = objs.newClass();
 
-function objs.Component:constructor(...)	
+function objs.Component:initialize()	
 	rawset(self, "props", {});
 	rawset(self, "eves", {});
 end;
@@ -487,7 +487,7 @@ end;
 
 objs.HierarchyObject = objs.Component.inherit();
 
-function objs.HierarchyObject:constructor(...)
+function objs.HierarchyObject:initialize()
 	rawset(self, "_children", {});
 end;
 
