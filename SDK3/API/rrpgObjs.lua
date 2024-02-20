@@ -114,6 +114,11 @@ end;
 --[[ Objeto TObject ]]--
 
 objs.class = {
+	_isClass = true,
+	
+	constructor = function(obj)
+	end,
+
 	addEventListener = function (obj, eventName, funcCallback, optionalSelfParameter)
 		return localObjs.addEventListener(obj, eventName, funcCallback, optionalSelfParameter);		
 	end,
@@ -330,7 +335,7 @@ local objectMetaTable = {
 				return v;
 			end;	
 		
-			currentClass = currentClass.super;
+			currentClass = rawget(currentClass, "super");
 		end;
 						
 		-- Se chegou até aqui, é porque não localizou nenhum valor especial
@@ -357,7 +362,7 @@ local objectMetaTable = {
 				return;
 			end;	
 		
-			currentClass = currentClass.super;
+			currentClass = rawget(currentClass, "super");
 		end;
 					
 		-- Se chegou até aqui, é porque não conseguiu fazer nenhuma atribuição especial.
@@ -377,6 +382,33 @@ local objectMetaTable = {
 	end
 };
 
+local classMetatable = {
+	__index = function(classTable, key)
+		if (key == "eves") or (key == "props") then
+			return rawget(classTable, key);
+		end;
+		
+		local currentClass = classTable;
+		
+		while currentClass ~= nil do
+			local v = rawget(currentClass, key);
+			
+			if v ~= nil then
+				return v;
+			end;
+		
+			currentClass = rawget(currentClass, "super");
+		end;
+						
+		-- Se chegou até aqui, é porque não localizou nenhum valor especial
+		return nil;
+	end,
+
+	__newindex = function(classTable, key, value)	
+		rawset(classTable, key, value);
+	end;
+};
+
 function objs.objectFromHandle(handle)
 	local obj = {handle=handle,
 				 class=objs.class};		
@@ -389,169 +421,204 @@ function objs.newPureLuaObject()
 	return objs.objectFromHandle(nil);
 end;
 
+function objs.__recursiveRunConstructor(obj, class, ...)
+	local superClass = class.super;
+	
+	if superClass ~= nil then
+		objs.__recursiveRunConstructor(obj, superClass, ...);
+	end;
+	
+	local constructor = rawget(class, "constructor");
+	
+	if constructor ~= nil then
+		constructor(obj, ...);
+	end;
+end;
+
 function objs.__createSubclass(superClass)
 	assert(superClass ~= nil);	
-	local class = {super = superClass, props = {}, eves = {}};		
-	
-	class.fromHandle = function(handle)
-		local obj = {handle=handle,
-					 class=class};		
-					 
+	local class = {super = superClass, props = {}, eves = {}, _isClass = true};		
+		
+	class.new = function(...)
+		local obj = {class=class};							 
+		setmetatable(obj, objectMetaTable);		
+		objs.__recursiveRunConstructor(obj, class, ...);		
+		return obj;		
+	end;		
+		
+	class.fromHandle = function(handle, ...)
+		local obj = {handle=handle, class=class};							 
 		setmetatable(obj, objectMetaTable);	
+		objs.__recursiveRunConstructor(obj, class, ...);	
 		return obj;		
 	end;
 	
 	class.inherit = function() return objs.__createSubclass(class); end;	
+	setmetatable(class, classMetatable);
 	return class;	
 end;
 
-function objs.inherit()
+function objs.newClass()
 	return objs.__createSubclass(objs.class);
 end;
 
+objs.inherit = objs.newClass;
+
+-- ## Component Class 
+
+objs.Component = objs.newClass();
+
+function objs.Component:constructor(...)	
+	rawset(self, "props", {});
+	rawset(self, "eves", {});
+end;
+
+function objs.Component:getName() return _obj_getProp(self.handle, "Name"); end;
+function objs.Component:setName(name) _obj_setProp(self.handle, "Name", name); end;
+
+objs.Component.props["name"] = {setter = "setName", getter = "getName", tipo = "string"};
+
 function objs.componentFromHandle(handle)
-	local obj = objs.objectFromHandle(handle);	
-	
-	function obj:getName() return _obj_getProp(self.handle, "Name"); end;
-	function obj:setName(name) _obj_setProp(self.handle, "Name", name); end;			
-	
-	obj.props = {}
-	obj.props["name"] = {setter = "setName", getter = "getName", tipo = "string"};		
-	
-	obj.eves = {};
+	local obj = objs.Component.fromHandle(handle);	
 	return obj;
 end;
 
-function objs.hierarchyObjectFromHandle(handle)
-	local obj = objs.componentFromHandle(handle);	
-	obj._parent = nil;
-	obj._children = {};	
+-- ## HierarchyObject Class
+
+objs.HierarchyObject = objs.Component.inherit();
+
+function objs.HierarchyObject:constructor(...)
+	rawset(self, "_children", {});
+end;
+
+function objs.HierarchyObject.getChildren(instance)
+	local ret = {};
+	local idxDest = 1;
 	
-	function obj:getChildren()
-		local ret = {};
-		local idxDest = 1;
-		
-		for k, v in pairs(obj._children) do
-			ret[idxDest] = v;
-			idxDest = idxDest + 1;
-		end;
-		
-		return ret;
-	end;	
-		
-	function obj:findChildByName(childName, recursive, superficialSearch)
-		if recursive == nil then
-			recursive = true;
-		end;
-		
-		local child;		
-		
-		child = self[childName];
-		
-		if type(child) == "table" and (child.handle ~= nil) and (child.getName ~= nil) and (child:getName() == childName) then
-			return child;
-		end;
-		
-		if superficialSearch then
-			return nil;
-		end;
-		
-		local childs = self:getChildren();		
-		
-		for i = 1, #childs, 1 do
-			child = childs[i];
-			
-			if child.getName ~= nil then
-		
-				if child:getName() == childName then
-					return child;
-				end;
-			end;
-		end;
-				
-		if recursive then
-			local retChild;
-		
-			for i = 1, #childs, 1 do
-				child = childs[i];
-				retChild = child:findChildByName(childName, recursive);
-				
-				if retChild ~= nil then
-					return retChild;
-				end;
-			end;			
-		end;
-		
+	for k, v in pairs(instance._children) do
+		ret[idxDest] = v;
+		idxDest = idxDest + 1;
+	end;
+	
+	return ret;
+end;
+
+function objs.HierarchyObject.findChildByName(instance, childName, recursive, superficialSearch)
+	recursive = recursive or true;
+	local child;		
+	
+	child = instance[childName];
+	
+	if type(child) == "table" and (child.handle ~= nil) and (child.getName ~= nil) and (child:getName() == childName) then
+		return child;
+	end;
+	
+	if superficialSearch then
 		return nil;
 	end;
 	
-	function obj:getParent() return gui.fromHandle(_gui_getParent(self.handle)) end
+	local childs = instance:getChildren();		
 	
-	function obj:setParent(parent) 
-		if (self._parent == parent) then
-			return;
-		end;
+	for i = 1, #childs, 1 do
+		child = childs[i];
 		
-		if (self._parent ~= nil) then
-			self._parent._children[self.handle] = nil;
-		end
-		
-		self._parent = parent;
-		
-		if (self._parent ~= nil) then
-			_gui_setParent(self.handle, parent.handle); 
-			self._parent._children[self.handle] = self;
-		else
-			_gui_setParent(self.handle, nil); 		
-		end		
-	end;	
+		if child.getName ~= nil then
 	
-	obj._oldDestroyHierarchyObject = obj.destroy;
-	
-	 function obj:destroy()		 
-		self:removeAllEventListeners();
-	 
-	 	if self._children ~= nil then	 		 	
-		    for k, v in pairs(self._children) do
-		    	if v ~= nil then
-		    		v:setParent(nil);
-		    	end;
-		    end;
-		 
-			self._children = {};
-		end;
-		
-		if (self._parent ~= nil) then
-			
-			if (self._parent._children ~= nil) and (self.handle ~= nil) then
-				self._parent._children[self.handle] = nil;			
+			if child:getName() == childName then
+				return child;
 			end;
-				
-			self._parent = nil;				
-		end;			
-		
-		self:_oldDestroyHierarchyObject();
-	end		
+		end;
+	end;
+			
+	if recursive then
+		local retChild;
 	
+		for i = 1, #childs, 1 do
+			child = childs[i];
+			retChild = child:findChildByName(childName, recursive);
+			
+			if retChild ~= nil then
+				return retChild;
+			end;
+		end;			
+	end;
+	
+	return nil;
+end;
+
+function objs.HierarchyObject.getParent(instance)
+	return GUI.fromHandle(_gui_getParent(instance.handle))
+end;
+
+function objs.HierarchyObject.setParent(instance, parent)
+	if (instance._parent == parent) then
+		return;
+	end;
+	
+	if (instance._parent ~= nil) then
+		instance._parent._children[instance.handle] = nil;
+	end
+	
+	instance._parent = parent;
+	
+	if (instance._parent ~= nil) then
+		_gui_setParent(instance.handle, parent.handle); 
+		instance._parent._children[instance.handle] = instance;
+	else
+		_gui_setParent(instance.handle, nil); 		
+	end;		
+end;
+
+objs.HierarchyObject.__oldDestroyHierarchyObject = objs.HierarchyObject.destroy;
+
+function objs.HierarchyObject.destroy(instance)
+	instance:removeAllEventListeners();
+ 
+	if instance._children ~= nil then	 		 	
+		for k, v in pairs(instance._children) do
+			if v ~= nil then
+				v:setParent(nil);
+			end;
+		end;
+	 
+		instance._children = {};
+	end;
+	
+	if (instance._parent ~= nil) then
+		
+		if (instance._parent._children ~= nil) and (instance.handle ~= nil) then
+			instance._parent._children[instance.handle] = nil;			
+		end;
+			
+		instance._parent = nil;				
+	end;			
+	
+	objs.HierarchyObject.__oldDestroyHierarchyObject(instance);
+end;
+
+function objs.hierarchyObjectFromHandle(handle)
+	local obj = objs.HierarchyObject.fromHandle(handle);				
 	return obj;
 end;
 
-function objs.__timerFromHandle(handle)
-	local timer = objs.hierarchyObjectFromHandle(handle);
-	
-	function timer:getInterval() return _obj_getProp(timer.handle, "Interval") end;
-	function timer:setInterval(v) _obj_setProp(timer.handle, "Interval", v) end;
-	
-	function timer:getEnabled() return _obj_getProp(timer.handle, "Enabled") end;
-	function timer:setEnabled(v) _obj_setProp(timer.handle, "Enabled", v) end;			
-	
-	function timer:beginUpdate() end;
-	function timer:endUpdate() end;	
-	
-	timer.props["interval"] = {setter = "setInterval", getter = "getInterval", tipo = "int"};	
-	timer.props["enabled"] = {setter = "setEnabled", getter = "getEnabled", tipo = "bool"};
+-- ## Timer Class
 
-	timer.eves["onTimer"] = "";					
+objs.Timer = objs.HierarchyObject.inherit();
+
+function objs.Timer:getInterval() return _obj_getProp(self.handle, "Interval") end;
+function objs.Timer:setInterval(v) _obj_setProp(self.handle, "Interval", v) end;
+function objs.Timer:getEnabled() return _obj_getProp(self.handle, "Enabled") end;
+function objs.Timer:setEnabled(v) _obj_setProp(self.handle, "Enabled", v) end;			
+function objs.Timer:beginUpdate() end;
+function objs.Timer:endUpdate() end;	
+
+objs.Timer.props["interval"] = {setter = "setInterval", getter = "getInterval", tipo = "int"};	
+objs.Timer.props["enabled"] = {setter = "setEnabled", getter = "getEnabled", tipo = "bool"};
+
+objs.Timer.eves["onTimer"] = "";	
+
+function objs.__timerFromHandle(handle)
+	local timer = objs.Timer.fromHandle(handle);				
 	return timer;
 end;
 

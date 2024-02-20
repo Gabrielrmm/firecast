@@ -34,13 +34,45 @@ function lfm_enumEvents(ctrlOrHandle)
 		
 	local eves = {};
 	local qt = 0;
+	local alreadyListedEves = {};
 	
-	for k, v in pairs(obj.eves) do
-		qt = qt + 1;
-		eves[qt] = {name = k, parameters = v};
+	local function processEvent(eventName, eventData)
+		if not alreadyListedEves[eventName] then
+			alreadyListedEves[eventName] = true;
+			qt = qt + 1;
+			eves[qt] = {name = eventName, parameters = eventData};
+		end;	
 	end;
+	
+	-- Instance Defined Events	
+	local definedEves = obj.eves;
+	
+	if definedEves ~= nil then
+		for k, v in pairs(obj.eves) do
+			processEvent(k, v);
+		end;
+	end;
+	
+	-- Class Defined Events
+	local currentClass = rawget(obj, "class");
+		
+	while currentClass ~= nil do
+		definedEves = currentClass.eves;
+	
+		if definedEves ~= nil then
+			for k, v in pairs(definedEves) do
+				processEvent(k, v);
+			end;	
+		end;
+	
+		currentClass = currentClass.super;
+	end;			
 		
 	return eves;
+end;
+
+local function __copyPropTable(propName, prop)
+	return {name = propName, tipo = prop.tipo, values = prop.values, getter = prop.getter, setter = prop.setter};
 end;
 
 function lfm_enumProps(ctrlOrHandle)
@@ -48,10 +80,38 @@ function lfm_enumProps(ctrlOrHandle)
 		
 	local props = {};
 	local qt = 0;
+	local alreadyListedProps = {};
 	
-	for k, v in pairs(obj.props) do
-		qt = qt + 1;
-		props[qt] = {name = k, tipo = v.tipo, values = v.values, getter = v.getter, setter = v.setter};
+	local function processProp(propName, prop)
+		if not alreadyListedProps[propName] then
+			alreadyListedProps[propName] = true;
+			qt = qt + 1;
+			props[qt] =  __copyPropTable(propName, prop);
+		end;
+	end;
+	
+	-- Instance Defined Props		
+	local definedProps = obj.props;
+	
+	if definedProps ~= nil then
+		for k, v in pairs(definedProps) do
+			processProp(k, v);
+		end;	
+	end;
+	
+	-- Class Defined Props	
+	local currentClass = rawget(obj, "class");
+		
+	while currentClass ~= nil do
+		definedProps = currentClass.props;
+	
+		if definedProps ~= nil then
+			for k, v in pairs(definedProps) do
+				processProp(k, v);
+			end;	
+		end;
+	
+		currentClass = currentClass.super;
 	end;
 		
 	return props;

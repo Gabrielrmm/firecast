@@ -14,194 +14,197 @@ gui.guiLoaders = guiLoaders;
 
 
 --[[ Objeto Control ]]--
+gui.Control = objs.HierarchyObject.inherit();
 
-local function controlFromHandle(handle)
-	local ctrl = objs.hierarchyObjectFromHandle(handle);		
-		
-	function ctrl:setFocus() _obj_invoke(self.handle, "SetFocus");	end;	
-	function ctrl:beginUpdate() _obj_invoke(self.handle, "BeginUpdate"); end
-	function ctrl:endUpdate() _obj_invoke(self.handle, "EndUpdate"); end
-	function ctrl:needRepaint() _obj_invoke(self.handle, "Repaint"); end
-	
-	function ctrl:getVisible() return _obj_getProp(self.handle, "Visible"); end;
-	function ctrl:setVisible(visible) _obj_setProp(self.handle, "Visible", visible == true) end;	
-	
-	function ctrl:getAlign() return _obj_getProp(self.handle, "Align"); end;
-	function ctrl:setAlign(align) _obj_setProp(self.handle, "Align", align); end;	
-	
-	function ctrl:getEnabled()return  _obj_getProp(self.handle, "Enabled"); end;
-	function ctrl:setEnabled(enabled) _obj_setProp(self.handle, "Enabled", enabled == true) end;	
-	
-	function ctrl:getLeft() return _obj_getProp(self.handle, "Position.X"); end;
-	function ctrl:setLeft(left) _obj_setProp(self.handle, "Position.X", left) end;	
-	
-	function ctrl:getTop() return _obj_getProp(self.handle, "Position.Y"); end;
-	function ctrl:setTop(top) _obj_setProp(self.handle, "Position.Y", top) end;		
-	
-	function ctrl:getBottom() return self:getTop() + self:getHeight(); end;
-	function ctrl:setBottom(bottom) self:setTop(bottom - self:getHeight()); end;		
-	
-	function ctrl:getRight() return self:getLeft() + self:getWidth(); end;
-	function ctrl:setRight(right) self:setLeft(right - self:getWidth()); end;				
-	
-	function ctrl:getWidth() return _obj_getProp(self.handle, "Width"); end;
-	function ctrl:setWidth(width) _obj_setProp(self.handle, "Width", width) end;	
-	
-	function ctrl:getHeight() return _gui_getHeight(self.handle); end;
-	function ctrl:setHeight(height) _gui_setHeight(self.handle, height) end;
-	
-	function ctrl:getHitTest() return _obj_getProp(self.handle, "HitTest"); end;
-	function ctrl:setHitTest(hittest) _obj_setProp(self.handle, "HitTest", hittest == true) end;		
-	
-	function ctrl:getTabOrder() return _obj_getProp(self.handle, "TabOrder"); end;
-	function ctrl:setTabOrder(tabOrder) _obj_setProp(self.handle, "TabOrder", tabOrder); end;	
-	
-	function ctrl:getOpacity() return _obj_getProp(self.handle, "Opacity"); end;
-	function ctrl:setOpacity(opacity) _obj_setProp(self.handle, "Opacity", opacity); end;	
-	
-	function ctrl:getMargins() return _obj_getProp(self.handle, "Margins"); end;
-	function ctrl:setMargins(margins) _gui_setMargins(self.handle, margins); end;		
-	
-	function ctrl:getPadding() return _obj_getProp(self.handle, "Padding"); end;
-	function ctrl:setPadding(padding) _gui_setPadding(self.handle, padding); end;			
-	
-	function ctrl:getAnchors() return _obj_getProp(self.handle, "Anchors"); end;
-	function ctrl:setAnchors(anchors) _obj_setProp(self.handle, "Anchors", anchors); end;		
-	
-	function ctrl:getCanFocus() return _obj_getProp(self.handle, "CanFocus"); end;
-	function ctrl:setCanFocus(canFocus) _obj_setProp(self.handle, "CanFocus", canFocus); end;	
-	
-	function ctrl:getRotationAngle() return _obj_getProp(self.handle, "RotationAngle"); end;
-	function ctrl:setRotationAngle(angle) _obj_setProp(self.handle, "RotationAngle", angle); end;		
-	
-	function ctrl:getRotationCenterX() return _obj_getProp(self.handle, "RotationCenter.X"); end;
-	function ctrl:setRotationCenterX(x) _obj_setProp(self.handle, "RotationCenter.X", x); end;			
-	
-	function ctrl:getRotationCenterY() return _obj_getProp(self.handle, "RotationCenter.Y"); end;
-	function ctrl:setRotationCenterY(y) _obj_setProp(self.handle, "RotationCenter.Y", y); end;			
-	
-	function ctrl:getScaleX() return _obj_getProp(self.handle, "Scale.X"); end;
-	function ctrl:setScaleX(sX) _obj_setProp(self.handle, "Scale.X", sX); end;				
-	
-	function ctrl:getScaleY() return _obj_getProp(self.handle, "Scale.Y"); end;
-	function ctrl:setScaleY(sY) _obj_setProp(self.handle, "Scale.Y", sY); end;					
-	
-	function ctrl:getScale() return self:getScaleX(); end;
-	function ctrl:setScale(ss) self:beginUpdate(); self:setScaleX(ss); self:setScaleY(ss); self:endUpdate(); end;						
-	
-	function ctrl:isChildFocused() return _obj_getProp(self.handle, "IsChildFocused"); end;
-	function ctrl:isFocused() return _obj_getProp(self.handle, "IsFocused"); end;	
-	function ctrl:isMouseOver() return _obj_getProp(self.handle, "IsMouseOver"); end;
-	function ctrl:isVisible() return self:getVisible(); end;	
-	
-	function ctrl:getCursor() return _obj_getProp(self.handle, "MouseCursor"); end;
-	function ctrl:setCursor(v) _obj_setProp(self.handle, "MouseCursor", v); end;
-	
-	function ctrl:getHint() return _obj_getProp(self.handle, "Hint"); end;
-	function ctrl:setHint(v) _gui_setHint(self.handle, v); end;	
-	
-	function ctrl:getEffect() return _obj_getProp(self.handle, "CompEffect"); end;
-	function ctrl:setEffect(effect) _obj_setProp(self.handle, "CompEffect", effect); end;
-	
-	function ctrl:getEffectTriggers() return _obj_getProp(self.handle, "CompEffectTriggers"); end;
-	function ctrl:setEffectTriggers(triggers) _obj_setProp(self.handle, "CompEffectTriggers", triggers); end;	
-	
-	function ctrl:getEffectParam() return _obj_getProp(self.handle, "CompEffectParam"); end;
-	function ctrl:setEffectParam(param) _obj_setProp(self.handle, "CompEffectParam", param); end;	
-	
-	function ctrl:getEffectParam2() return _obj_getProp(self.handle, "CompEffectParam2"); end;
-	function ctrl:setEffectParam2(param) _obj_setProp(self.handle, "CompEffectParam2", param); end;		
-	
-	function ctrl:getEffectParam3() return _obj_getProp(self.handle, "CompEffectParam3"); end;
-	function ctrl:setEffectParam3(param) _obj_setProp(self.handle, "CompEffectParam3", param); end;			
+function gui.Control:constructor(...) 	
+	if self.props == nil then
+		self.props = {};
+	end;
+			
+	if self.eves == nil then
+		self.eves = {};
+	end;
 
-	function ctrl:getEffectParam4() return _obj_getProp(self.handle, "CompEffectParam4"); end;
-	function ctrl:setEffectParam4(param) _obj_setProp(self.handle, "CompEffectParam4", param); end;	
-			
-	function ctrl:findControlByName(controlName) return gui.findControlByName(controlName, self); end;
-	
-	function ctrl:getGrid()
-		local cachedGrid = rawget(self, "__cachedGrid");
+	self:setParent(self:getParent()); 		
+end;	
+
+function gui.Control:setFocus() _obj_invoke(self.handle, "SetFocus"); end;	
+function gui.Control:beginUpdate() _obj_invoke(self.handle, "BeginUpdate"); end;
+function gui.Control:endUpdate() _obj_invoke(self.handle, "EndUpdate"); end;
+function gui.Control:needRepaint() _obj_invoke(self.handle, "Repaint"); end;
+
+function gui.Control:getVisible() return _obj_getProp(self.handle, "Visible"); end;
+function gui.Control:setVisible(visible) _obj_setProp(self.handle, "Visible", visible == true) end;	
+
+function gui.Control:getAlign() return _obj_getProp(self.handle, "Align"); end;
+function gui.Control:setAlign(align) _obj_setProp(self.handle, "Align", align); end;	
+
+function gui.Control:getEnabled()return  _obj_getProp(self.handle, "Enabled"); end;
+function gui.Control:setEnabled(enabled) _obj_setProp(self.handle, "Enabled", enabled == true) end;	
+
+function gui.Control:getLeft() return _obj_getProp(self.handle, "Position.X"); end;
+function gui.Control:setLeft(left) _obj_setProp(self.handle, "Position.X", left) end;	
+
+function gui.Control:getTop() return _obj_getProp(self.handle, "Position.Y"); end;
+function gui.Control:setTop(top) _obj_setProp(self.handle, "Position.Y", top) end;		
+
+function gui.Control:getBottom() return self:getTop() + self:getHeight(); end;
+function gui.Control:setBottom(bottom) self:setTop(bottom - self:getHeight()); end;		
+
+function gui.Control:getRight() return self:getLeft() + self:getWidth(); end;
+function gui.Control:setRight(right) self:setLeft(right - self:getWidth()); end;				
+
+function gui.Control:getWidth() return _obj_getProp(self.handle, "Width"); end;
+function gui.Control:setWidth(width) _obj_setProp(self.handle, "Width", width) end;	
+
+function gui.Control:getHeight() return _gui_getHeight(self.handle); end;
+function gui.Control:setHeight(height) _gui_setHeight(self.handle, height) end;
+
+function gui.Control:getHitTest() return _obj_getProp(self.handle, "HitTest"); end;
+function gui.Control:setHitTest(hittest) _obj_setProp(self.handle, "HitTest", hittest == true) end;		
+
+function gui.Control:getTabOrder() return _obj_getProp(self.handle, "TabOrder"); end;
+function gui.Control:setTabOrder(tabOrder) _obj_setProp(self.handle, "TabOrder", tabOrder); end;	
+
+function gui.Control:getOpacity() return _obj_getProp(self.handle, "Opacity"); end;
+function gui.Control:setOpacity(opacity) _obj_setProp(self.handle, "Opacity", opacity); end;	
+
+function gui.Control:getMargins() return _obj_getProp(self.handle, "Margins"); end;
+function gui.Control:setMargins(margins) _gui_setMargins(self.handle, margins); end;		
+
+function gui.Control:getPadding() return _obj_getProp(self.handle, "Padding"); end;
+function gui.Control:setPadding(padding) _gui_setPadding(self.handle, padding); end;			
+
+function gui.Control:getAnchors() return _obj_getProp(self.handle, "Anchors"); end;
+function gui.Control:setAnchors(anchors) _obj_setProp(self.handle, "Anchors", anchors); end;		
+
+function gui.Control:getCanFocus() return _obj_getProp(self.handle, "CanFocus"); end;
+function gui.Control:setCanFocus(canFocus) _obj_setProp(self.handle, "CanFocus", canFocus); end;	
+
+function gui.Control:getRotationAngle() return _obj_getProp(self.handle, "RotationAngle"); end;
+function gui.Control:setRotationAngle(angle) _obj_setProp(self.handle, "RotationAngle", angle); end;		
+
+function gui.Control:getRotationCenterX() return _obj_getProp(self.handle, "RotationCenter.X"); end;
+function gui.Control:setRotationCenterX(x) _obj_setProp(self.handle, "RotationCenter.X", x); end;			
+
+function gui.Control:getRotationCenterY() return _obj_getProp(self.handle, "RotationCenter.Y"); end;
+function gui.Control:setRotationCenterY(y) _obj_setProp(self.handle, "RotationCenter.Y", y); end;			
+
+function gui.Control:getScaleX() return _obj_getProp(self.handle, "Scale.X"); end;
+function gui.Control:setScaleX(sX) _obj_setProp(self.handle, "Scale.X", sX); end;				
+
+function gui.Control:getScaleY() return _obj_getProp(self.handle, "Scale.Y"); end;
+function gui.Control:setScaleY(sY) _obj_setProp(self.handle, "Scale.Y", sY); end;					
+
+function gui.Control:getScale() return self:getScaleX(); end;
+function gui.Control:setScale(ss) self:beginUpdate(); self:setScaleX(ss); self:setScaleY(ss); self:endUpdate(); end;						
+
+function gui.Control:isChildFocused() return _obj_getProp(self.handle, "IsChildFocused"); end;
+function gui.Control:isFocused() return _obj_getProp(self.handle, "IsFocused"); end;	
+function gui.Control:isMouseOver() return _obj_getProp(self.handle, "IsMouseOver"); end;
+function gui.Control:isVisible() return self:getVisible(); end;	
+
+function gui.Control:getCursor() return _obj_getProp(self.handle, "MouseCursor"); end;
+function gui.Control:setCursor(v) _obj_setProp(self.handle, "MouseCursor", v); end;
+
+function gui.Control:getHint() return _obj_getProp(self.handle, "Hint"); end;
+function gui.Control:setHint(v) _gui_setHint(self.handle, v); end;	
+
+function gui.Control:getEffect() return _obj_getProp(self.handle, "CompEffect"); end;
+function gui.Control:setEffect(effect) _obj_setProp(self.handle, "CompEffect", effect); end;
+
+function gui.Control:getEffectTriggers() return _obj_getProp(self.handle, "CompEffectTriggers"); end;
+function gui.Control:setEffectTriggers(triggers) _obj_setProp(self.handle, "CompEffectTriggers", triggers); end;	
+
+function gui.Control:getEffectParam() return _obj_getProp(self.handle, "CompEffectParam"); end;
+function gui.Control:setEffectParam(param) _obj_setProp(self.handle, "CompEffectParam", param); end;	
+
+function gui.Control:getEffectParam2() return _obj_getProp(self.handle, "CompEffectParam2"); end;
+function gui.Control:setEffectParam2(param) _obj_setProp(self.handle, "CompEffectParam2", param); end;		
+
+function gui.Control:getEffectParam3() return _obj_getProp(self.handle, "CompEffectParam3"); end;
+function gui.Control:setEffectParam3(param) _obj_setProp(self.handle, "CompEffectParam3", param); end;			
+
+function gui.Control:getEffectParam4() return _obj_getProp(self.handle, "CompEffectParam4"); end;
+function gui.Control:setEffectParam4(param) _obj_setProp(self.handle, "CompEffectParam4", param); end;	
 		
-		if cachedGrid == nil then
-			if __delayedGridLib == nil then
-				__delayedGridLib = require("rrpgGUI_grid.dlua");
-				assert(__delayedGridLib ~= nil);
-			end;
-			
-			cachedGrid = __delayedGridLib.new(self);						
-			rawset(self, "__cachedGrid", cachedGrid);
+function gui.Control:findControlByName(controlName) return gui.findControlByName(controlName, self); end;
+
+function gui.Control:getGrid()
+	local cachedGrid = rawget(self, "__cachedGrid");
+	
+	if cachedGrid == nil then
+		if __delayedGridLib == nil then
+			__delayedGridLib = require("rrpgGUI_grid.dlua");
+			assert(__delayedGridLib ~= nil);
 		end;
 		
-		return cachedGrid;
-	end
-		
-	if ctrl.props == nil then
-		ctrl.props = {};
-	end;
-		
-	ctrl.props["visible"] = {setter = "setVisible", getter = "getVisible", tipo = "bool"};
-	ctrl.props["align"] = {setter = "setAlign", getter = "getAlign", tipo = "enum", 
-						   values = {"none", "top", "left", "right",
-						   			 "bottom", "client", "contents", "scale"}}	
-						   			 				   			 
-	ctrl.props["enabled"] = {setter = "setEnabled", getter = "getEnabled", tipo = "bool"};
-	ctrl.props["left"] = {setter = "setLeft", getter = "getLeft", tipo = "double"};
-	ctrl.props["top"] = {setter = "setTop", getter = "getTop", tipo = "double"};	
-	ctrl.props["right"] = {setter = "setRight", getter = "getRight", tipo = "double"};
-	ctrl.props["bottom"] = {setter = "setBottom", getter = "getBottom", tipo = "double"};		
-	ctrl.props["width"] = {setter = "setWidth", getter = "getWidth", tipo = "double"};
-	ctrl.props["height"] = {setter = "setHeight", getter = "getHeight", tipo = "double"};
-	ctrl.props["hitTest"] = {setter = "setHitTest", getter = "getHitTest", tipo = "bool"};
-	ctrl.props["tabOrder"] = {setter = "setTabOrder", getter = "getTabOrder", tipo = "int"};
-	ctrl.props["opacity"] = {setter = "setOpacity", getter = "getOpacity", tipo = "double"};
-	ctrl.props["margins"] = {setter = "setMargins", getter = "getMargins", tipo = "bounds"};
-	ctrl.props["padding"] = {setter = "setPadding", getter = "getPadding", tipo = "bounds"};	
-	ctrl.props["anchors"] = {setter = "setAnchors", getter = "getAnchors", tipo = "set",
-							 values = {"left", "top", "right", "bottom"}};
-							 
-	ctrl.props["canFocus"] = {setter = "setCanFocus", getter = "getCanFocus", tipo="bool"};
-	ctrl.props["rotationAngle"] = {setter = "setRotationAngle", getter = "getRotationAngle", tipo="double"};	
-	ctrl.props["rotationCenterX"] = {setter = "setRotationCenterX", getter = "getRotationCenterX", tipo="double"};	
-	ctrl.props["rotationCenterY"] = {setter = "setRotationCenterY", getter = "getRotationCenterY", tipo="double"};		
-	ctrl.props["scaleX"] = {setter = "setScaleX", getter = "getScaleX", tipo="double"};			
-	ctrl.props["scaleY"] = {setter = "setScaleY", getter = "getScaleY", tipo="double"};				
-	ctrl.props["scale"] = {setter = "setScale", getter = "getScale", tipo="double"};				
-	ctrl.props["parent"] = {setter = "setParent", getter = "getParent", tipo="table"};	
-	
-	ctrl.props["cursor"] = {setter = "setCursor", getter = "getCursor", tipo="enum",
-							values={'default', 'arrow', 'handPoint', 'hourGlass',
-   								    'IBeam', 'size', 'sizeNESW', 'sizeNS',
-								    'sizeNWSE', 'sizeWE', 'upArrow',
-								    'drag', 'noDrop', 'hSplit', 'vSplit',
-								    'multiDrag', 'sqlWait', 'no', 'appStart',
-								    'help', 'cross'}};	
-									
-	ctrl.props["hint"] = {setter = "setHint", getter = "getHint", tipo="string"};
-	ctrl.props["grid"] = {getter = "getGrid", tipo="table"};
-	
-	if ctrl.eves == nil then
-		ctrl.eves = {};
+		cachedGrid = __delayedGridLib.new(self);						
+		rawset(self, "__cachedGrid", cachedGrid);
 	end;
 	
-	ctrl.eves["onResize"] = "";
-	ctrl.eves["onClick"] = "event";
-	ctrl.eves["onDblClick"] = "event";
-	ctrl.eves["onMouseDown"] = "event";
-	ctrl.eves["onMouseMove"] = "event";
-	ctrl.eves["onMouseUp"] = "event";
-	ctrl.eves["onMouseEnter"] = "";
-	ctrl.eves["onMouseLeave"] = "";
-	ctrl.eves["onEnter"] = "";
-	ctrl.eves["onExit"] = "";
-	ctrl.eves["onKeyDown"] = "event";
-	ctrl.eves["onKeyUp"] = "event";
-	ctrl.eves["onMenu"] = 'x, y, event';
-	ctrl.eves["onStartDrag"] = 'drag, x, y, event';	
-	ctrl.eves["onStartDrop"] = 'drop, x, y, drag, event';		
-	
-	ctrl:setParent(ctrl:getParent()); 
-	
+	return cachedGrid;
+end;
+
+gui.Control.props["visible"] = {setter = "setVisible", getter = "getVisible", tipo = "bool"};
+gui.Control.props["align"] = {setter = "setAlign", getter = "getAlign", tipo = "enum", 
+							   values = {"none", "top", "left", "right",
+										 "bottom", "client", "contents", "scale"}}	
+															 
+gui.Control.props["enabled"] = {setter = "setEnabled", getter = "getEnabled", tipo = "bool"};
+gui.Control.props["left"] = {setter = "setLeft", getter = "getLeft", tipo = "double"};
+gui.Control.props["top"] = {setter = "setTop", getter = "getTop", tipo = "double"};	
+gui.Control.props["right"] = {setter = "setRight", getter = "getRight", tipo = "double"};
+gui.Control.props["bottom"] = {setter = "setBottom", getter = "getBottom", tipo = "double"};		
+gui.Control.props["width"] = {setter = "setWidth", getter = "getWidth", tipo = "double"};
+gui.Control.props["height"] = {setter = "setHeight", getter = "getHeight", tipo = "double"};
+gui.Control.props["hitTest"] = {setter = "setHitTest", getter = "getHitTest", tipo = "bool"};
+gui.Control.props["tabOrder"] = {setter = "setTabOrder", getter = "getTabOrder", tipo = "int"};
+gui.Control.props["opacity"] = {setter = "setOpacity", getter = "getOpacity", tipo = "double"};
+gui.Control.props["margins"] = {setter = "setMargins", getter = "getMargins", tipo = "bounds"};
+gui.Control.props["padding"] = {setter = "setPadding", getter = "getPadding", tipo = "bounds"};	
+gui.Control.props["anchors"] = {setter = "setAnchors", getter = "getAnchors", tipo = "set",
+						 values = {"left", "top", "right", "bottom"}};
+						 
+gui.Control.props["canFocus"] = {setter = "setCanFocus", getter = "getCanFocus", tipo="bool"};
+gui.Control.props["rotationAngle"] = {setter = "setRotationAngle", getter = "getRotationAngle", tipo="double"};	
+gui.Control.props["rotationCenterX"] = {setter = "setRotationCenterX", getter = "getRotationCenterX", tipo="double"};	
+gui.Control.props["rotationCenterY"] = {setter = "setRotationCenterY", getter = "getRotationCenterY", tipo="double"};		
+gui.Control.props["scaleX"] = {setter = "setScaleX", getter = "getScaleX", tipo="double"};			
+gui.Control.props["scaleY"] = {setter = "setScaleY", getter = "getScaleY", tipo="double"};				
+gui.Control.props["scale"] = {setter = "setScale", getter = "getScale", tipo="double"};				
+gui.Control.props["parent"] = {setter = "setParent", getter = "getParent", tipo="table"};	
+
+gui.Control.props["cursor"] = {setter = "setCursor", getter = "getCursor", tipo="enum",
+								values={'default', 'arrow', 'handPoint', 'hourGlass',
+										'IBeam', 'size', 'sizeNESW', 'sizeNS',
+										'sizeNWSE', 'sizeWE', 'upArrow',
+										'drag', 'noDrop', 'hSplit', 'vSplit',
+										'multiDrag', 'sqlWait', 'no', 'appStart',
+										'help', 'cross'}};	
+								
+gui.Control.props["hint"] = {setter = "setHint", getter = "getHint", tipo="string"};
+gui.Control.props["grid"] = {getter = "getGrid", tipo="table"};
+
+
+gui.Control.eves["onResize"] = "";
+gui.Control.eves["onClick"] = "event";
+gui.Control.eves["onDblClick"] = "event";
+gui.Control.eves["onMouseDown"] = "event";
+gui.Control.eves["onMouseMove"] = "event";
+gui.Control.eves["onMouseUp"] = "event";
+gui.Control.eves["onMouseEnter"] = "";
+gui.Control.eves["onMouseLeave"] = "";
+gui.Control.eves["onEnter"] = "";
+gui.Control.eves["onExit"] = "";
+gui.Control.eves["onKeyDown"] = "event";
+gui.Control.eves["onKeyUp"] = "event";
+gui.Control.eves["onMenu"] = 'x, y, event';
+gui.Control.eves["onStartDrag"] = 'drag, x, y, event';	
+gui.Control.eves["onStartDrop"] = 'drop, x, y, drag, event';		
+
+local function controlFromHandle(handle)
+	local ctrl = gui.Control.fromHandle(handle);			
 	return ctrl;
 end
 
@@ -1565,7 +1568,6 @@ function gui.newPopup()
 end;
 
 guiLoaders["popup"] = popupFromHandle;
-
 
 --[[ Objeto Progress Bar ]]--
 
