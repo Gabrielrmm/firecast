@@ -174,6 +174,38 @@ objs.class = {
 		else
 			return "";
 		end;	
+	end,
+	
+	findProp = function(obj, propName)
+		-- Instance property		
+		local props = rawget(obj, "props");			
+		
+		if props ~= nil then	
+			local propKey = props[propName];
+			
+			if propKey ~= nil then
+				return propKey;
+			end;
+		end;
+		
+		-- Class property
+		local currentClass = rawget(obj, "class");	
+		
+		while currentClass ~= nil do
+			props = rawget(currentClass, "props");			
+		
+			if props ~= nil then	
+				local propKey = props[propName];
+				
+				if propKey ~= nil then
+					return propKey;
+				end;				
+			end;	
+		
+			currentClass = rawget(currentClass, "super");
+		end;
+		
+		return nil;
 	end
 };
 

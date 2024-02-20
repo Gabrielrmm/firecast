@@ -86,7 +86,7 @@ function lfm_enumProps(ctrlOrHandle)
 		if not alreadyListedProps[propName] then
 			alreadyListedProps[propName] = true;
 			qt = qt + 1;
-			props[qt] =  __copyPropTable(propName, prop);
+			props[qt] = __copyPropTable(propName, prop);
 		end;
 	end;
 	
@@ -115,6 +115,39 @@ function lfm_enumProps(ctrlOrHandle)
 	end;
 		
 	return props;
+end;
+
+function lfm_enumGridPropsForCompiler()
+	local gridClass = require("rrpgGUI_grid.dlua");
+		
+	local props = {};
+	local qt = 0;
+	local alreadyListedProps = {};
+	
+	local function processProp(propName, prop)
+		if not alreadyListedProps[propName] then
+			alreadyListedProps[propName] = true;
+			qt = qt + 1;
+			props[qt] = __copyPropTable(propName, prop);
+		end;
+	end;
+	
+	-- Class Defined Props	
+	local currentClass = gridClass;
+		
+	while currentClass ~= nil do
+		definedProps = currentClass.props;
+	
+		if definedProps ~= nil then
+			for k, v in pairs(definedProps) do
+				processProp(k, v);
+			end;	
+		end;
+	
+		currentClass = currentClass.super;
+	end;
+		
+	return props;	
 end;
 
 local function _getStrOfSetTable(value)
@@ -254,33 +287,26 @@ end;
 
 function lfm_setPropAsString(ctrlOrHandle, propName, vAsStr)
 	local obj = lfm_getObject(ctrlOrHandle);
-	local props = obj.props;
-		
-	if props == nil then
-		return nil;
-	end;
+	local prop;
 	
-	local prop = props[propName];
+	if obj.findProp ~= nil then
+		prop = obj:findProp(propName);
+	end;	
+	
+	if prop == nil then
+		local props = obj.props;
+
+		if props ~= nil then
+			prop = props[propName];
+		end;
+	end;
 	
 	if prop == nil then
 		return nil;
 	end;
 	
 	v = lfm_strToValue(vAsStr, prop.tipo, prop.values);
-	local setterName = prop.setter;
-	
-	if setterName ~= nil then
-		local setter = obj[setterName];
-		setter(obj, v);
-	else
-		local writePropName = prop.writeProp;
-		
-		if writePropName == nil then
-			error(propName .. " is readonly");			
-		end;
-		
-		_obj_setProp(obj.handle, writePropName, v);
-	end;	
+	obj[propName] = v;	
 end;
 
 function lfm_getPropAsStringToUser(ctrlOrHandle, propName)
