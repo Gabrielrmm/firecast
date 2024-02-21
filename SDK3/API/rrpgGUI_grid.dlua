@@ -89,8 +89,8 @@ end;
 local function __registerNonScreenSizeProp(details)
 	local hostPropertyNamme = details.hostName;	
 	local luaFirstLetterUpperCasePropName = details.luaName:gsub("^%l", string.upper);
-	local useDefaultValue = details.useDefaultValue;
-	local defaultValue = details.defaultValue;
+	local useDefaultValue = details.useDefaultValueOnSet;
+	local defaultValue = details.defaultValueOnSet;
 
 	local setter = 
 		function (instance, value)
@@ -129,12 +129,24 @@ function Grid:reset()
 	return self;
 end;
 
+local GRID_VERT_ALIGN_VALUES = {"top", "center", "middle", "bottom"};
+local GRID_HORZ_ALIGN_VALUES = {"start", "center", "end", "around", "between", "left", "right", "middle"};
+
 __registerNonScreenSizeProp({luaName="role", hostName="Role", tipo="enum", values={"none", "row", "col", "inlineBlock", "container"}});
-__registerNonScreenSizeProp({luaName="root", hostName="Root", tipo="bool", useDefaultValue=true, defaultValue=true});
-__registerNonScreenSizeProp({luaName="screenSizeDeterminator", lfmName="screen-size-determinator", hostName="ScreenSizeDeterminator", tipo="bool", useDefaultValue=true, defaultValue=true});
+__registerNonScreenSizeProp({luaName="root", hostName="Root", tipo="bool", useDefaultValueOnSet=true, defaultValueOnSet=true});
+__registerNonScreenSizeProp({luaName="screenSizeDet", lfmName="screen-size-det", hostName="ScreenSizeDeterminator", tipo="bool", useDefaultValueOnSet=true, defaultValueOnSet=true});
+__registerNonScreenSizeProp({luaName="autoHeight", lfmName="auto-height", hostName="AutoHeight", tipo="bool", useDefaultValueOnSet=true, defaultValueOnSet=true});
 
 __registerScreenSizeProp({luaName="width", hostName="Width", tipo="int"});
-__registerScreenSizeProp({luaName="cntVertAlign", lfmName="cnt-vert-align", hostName="CntVertAlign", tipo="enum", values={"top", "center", "middle", "bottom"}});
+__registerScreenSizeProp({luaName="cntVertAlign", lfmName="cnt-vert-align", hostName="CntVertAlign", tipo="enum", values=GRID_VERT_ALIGN_VALUES});
+__registerScreenSizeProp({luaName="cntHorzAlign", lfmName="cnt-horz-align", hostName="CntHorzAlign", tipo="enum", values=GRID_HORZ_ALIGN_VALUES});
+__registerScreenSizeProp({luaName="cntGutter", lfmName="cnt-gutter", hostName="CntGutter", tipo="double"});
+__registerScreenSizeProp({luaName="cntLineSpacing", lfmName="cnt-line-spacing", hostName="CntLineSpacing", tipo="double"});
+__registerScreenSizeProp({luaName="cntMinGridWidth", lfmName="cnt-min-grid-width", hostName="CntMinGridWidth", tipo="double"});
+__registerScreenSizeProp({luaName="cntMinGridWidthFt", lfmName="cnt-min-grid-width-ft", hostName="CntMinGridWidthFt", tipo="double"});
+__registerScreenSizeProp({luaName="invisibleReserved", lfmName="invisible-reserved", hostName="InvisibleReserved", tipo="bool"});
+__registerScreenSizeProp({luaName="selfVertAlign", lfmName="self-vert-align", hostName="SelfVertAlign", tipo="enum", values=GRID_VERT_ALIGN_VALUES});
+__registerScreenSizeProp({luaName="selfGutter", lfmName="self-gutter", hostName="SelfGutter", tipo="double"});
 
 -- Instance
 
