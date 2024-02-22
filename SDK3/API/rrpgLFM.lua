@@ -39,8 +39,17 @@ function lfm_enumEvents(ctrlOrHandle)
 	local function processEvent(eventName, eventData)
 		if not alreadyListedEves[eventName] then
 			alreadyListedEves[eventName] = true;
-			qt = qt + 1;
-			eves[qt] = {name = eventName, parameters = eventData};
+			
+			local eveRec = {name = eventName};
+			
+			if type(eventData) == "table" then
+				eveRec.parameters = eventData.arguments or "";	
+			else
+				eveRec.parameters = eventData or "";
+			end;
+			
+			qt = qt + 1;					
+			eves[qt] = eveRec;
 		end;	
 	end;
 	
@@ -148,6 +157,48 @@ function lfm_enumGridPropsForCompiler()
 	end;
 		
 	return props;	
+end;
+
+function lfm_enumGridEventsForCompiler()
+	local gridClass = require("rrpgGUI_grid.dlua");
+		
+	local eves = {};
+	local qt = 0;
+	local alreadyListedEves = {};
+	
+	local function processEvent(eventName, eventData)
+		if not alreadyListedEves[eventName] then
+			alreadyListedEves[eventName] = true;
+			
+			local eveRec = {name = eventName};
+			
+			if type(eventData) == "table" then
+				eveRec.parameters = eventData.arguments or "";	
+			else
+				eveRec.parameters = eventData or "";
+			end;
+			
+			qt = qt + 1;					
+			eves[qt] = eveRec;
+		end;	
+	end;
+		
+	-- Class Defined Events
+	local currentClass = gridClass;
+		
+	while currentClass ~= nil do
+		definedEves = currentClass.eves;
+	
+		if definedEves ~= nil then
+			for k, v in pairs(definedEves) do
+				processEvent(k, v);
+			end;	
+		end;
+	
+		currentClass = currentClass.super;
+	end;			
+		
+	return eves;	
 end;
 
 local function _getStrOfSetTable(value)
