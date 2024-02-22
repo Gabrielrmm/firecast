@@ -89,7 +89,7 @@ function objs.addEventListener(object, eventName, funcCallback, parameterSelf)
 		
 			eveDef.setter(object, 
 				function(...)
-					capturedCallback(capturedSelf, ...);
+					return capturedCallback(capturedSelf, ...);
 				end);			
 		else
 			eveDef.setter(object, eveItem.funcCallback);

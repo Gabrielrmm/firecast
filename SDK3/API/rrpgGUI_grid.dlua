@@ -200,10 +200,17 @@ __registerScreenSizeProp({luaName="marginLeft", lfmName="margin-left", hostName=
 __registerScreenSizeProp({luaName="marginTop", lfmName="margin-top", hostName="MarginTop", tipo="double"});
 __registerScreenSizeProp({luaName="marginRight", lfmName="margin-right", hostName="MarginRight", tipo="double"});
 __registerScreenSizeProp({luaName="marginBottom", lfmName="margin-bottom", hostName="MarginBottom", tipo="double"});
+__registerScreenSizeProp({luaName="dynWidthTxt", lfmName="dyn-width-txt", hostName="DynWidthTxt", tipo="bool"});
+__registerScreenSizeProp({luaName="dynHeightTxt", lfmName="dyn-height-txt", hostName="DynHeightTxt", tipo="bool"});
+__registerScreenSizeProp({luaName="dynWidthSingleLine", lfmName="dyn-width-single-line", hostName="DynWidthSingleLine", tipo="bool"});
+__registerScreenSizeProp({luaName="dynWidthEachLine", lfmName="dyn-width-each-line", hostName="DynWidthEachLine", tipo="bool"});
 
 
 -- Grid Events
+
 __registerScreenSizeEvent({luaName="onPrepare", lfmName="on-prepare", hostName="OnPrepare", arguments="screenSize"});
+__registerScreenSizeEvent({luaName="onGetWidth", lfmName="on-get-width", hostName="OnGetWidth", arguments="screenSize, width"});
+__registerScreenSizeEvent({luaName="onGetHeight", lfmName="on-get-height", hostName="OnGetHeight", arguments="screenSize, height"});
 
 -- Instance
 
