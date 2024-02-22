@@ -132,7 +132,7 @@ local function __registerScreenSizeEvent_specificScreenSize(screenSize, details,
 			Grid.eves[details.lfmName] = eve;
 		end;
 	else					
-		if Grid.lfmName ~= nil then
+		if details.lfmName ~= nil then
 			Grid.eves[details.lfmName .. "-" .. screenSize] = eve; 
 		else
 			Grid.eves[details.luaName .. "-" .. screenSize] = eve;

@@ -68,8 +68,36 @@ function objs.addEventListener(object, eventName, funcCallback, parameterSelf)
 	localObjs.events.selfParams[esteEventId] = parameterSelf;
 			
 	evesOfObject[esteEventId] = eveItem;
+
+	local eveDefFinder = object.findEventDef;
+	local eveDef;
 	
-	_obj_listenEvent(objectHandle, eventName, esteEventId);	
+	if eveDefFinder ~= nil then
+		eveDef = eveDefFinder(object, eventName);
+	else
+		eveDef = nil;
+	end;
+	
+	if (eveDef ~= nil) and (type(eveDef) == "table") and (type(eveDef.setter) == "function") then		
+		eveItem.haveCustomSetter = true;
+		eveItem.setter = eveDef.setter;
+		eveItem.object = object;
+		
+		if eveItem.hasParameterSelf then
+			local capturedCallback = eveItem.funcCallback;
+			local capturedSelf = parameterSelf;
+		
+			eveDef.setter(object, 
+				function(...)
+					capturedCallback(capturedSelf, ...);
+				end);			
+		else
+			eveDef.setter(object, eveItem.funcCallback);
+		end;
+	else		
+		_obj_listenEvent(objectHandle, eventName, esteEventId);	
+	end;
+	
 	return esteEventId; 
 end;
 
@@ -81,7 +109,13 @@ function objs.removeEventListenerById(eventId)
 		return;
 	end;
 	
-	_obj_stopListeningEvent(eventItem.objectHandle, eventId);	
+	if eventItem.haveCustomSetter then
+		eventItem.setter(eventItem.object, nil);
+		eventItem.object = nil;
+		eventItem.setter = nil;
+	else	
+		_obj_stopListeningEvent(eventItem.objectHandle, eventId);	
+	end;
 	
 	localObjs.events.selfParams[eventId] = nil;
 	localObjs.events.handlers[eventId] = nil;	
@@ -176,7 +210,7 @@ objs.class = {
 		end;	
 	end,
 	
-	findProp = function(obj, propName)
+	findPropDef = function(obj, propName)
 		-- Instance property		
 		local props = rawget(obj, "props");			
 		
@@ -206,7 +240,39 @@ objs.class = {
 		end;
 		
 		return nil;
-	end
+	end,
+	
+	findEventDef = function(obj, eventName)
+		-- Instance event		
+		local eves = rawget(obj, "eves");			
+		
+		if eves ~= nil then	
+			local eveKey = eves[eventName];
+			
+			if eveKey ~= nil then
+				return eveKey;
+			end;
+		end;
+		
+		-- Class event
+		local currentClass = rawget(obj, "class");	
+		
+		while currentClass ~= nil do
+			eves = rawget(currentClass, "eves");			
+		
+			if eves ~= nil then	
+				local eveKey = eves[eventName];
+				
+				if eveKey ~= nil then
+					return eveKey;
+				end;				
+			end;	
+		
+			currentClass = rawget(currentClass, "super");
+		end;
+		
+		return nil;
+	end	
 };
 
 objs.class.listen = objs.class.addEventListener;

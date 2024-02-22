@@ -340,8 +340,8 @@ function lfm_setPropAsString(ctrlOrHandle, propName, vAsStr)
 	local obj = lfm_getObject(ctrlOrHandle);
 	local prop;
 	
-	if obj.findProp ~= nil then
-		prop = obj:findProp(propName);
+	if obj.findPropDef ~= nil then
+		prop = obj:findPropDef(propName);
 	end;	
 	
 	if prop == nil then
