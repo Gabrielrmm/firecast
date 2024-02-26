@@ -166,6 +166,10 @@ function Grid:reset()
 	return self;
 end;
 
+function Grid:getTxtWidth()
+	return _obj_invokeEx(self.handle, "GetTxtWidth");
+end;
+
 local GRID_VERT_ALIGN_VALUES = {"top", "center", "middle", "bottom"};
 local GRID_HORZ_ALIGN_VALUES = {"start", "center", "end", "around", "between", "left", "right", "middle"};
 local GRID_CONTAINER_HORZ_ALIGN_VALUES = {"start", "center", "end", "left", "right", "middle"};
@@ -181,7 +185,6 @@ __registerScreenSizeProp({luaName="width", hostName="Width", tipo="int"});
 __registerScreenSizeProp({luaName="offset", lfmName="offset", hostName="Offset", tipo="int"});
 __registerScreenSizeProp({luaName="push", lfmName="push", hostName="Push", tipo="int"});
 __registerScreenSizeProp({luaName="pull", lfmName="pull", hostName="Pull", tipo="int"});
-
 __registerScreenSizeProp({luaName="cntVertAlign", lfmName="cnt-vert-align", hostName="CntVertAlign", tipo="enum", values=GRID_VERT_ALIGN_VALUES});
 __registerScreenSizeProp({luaName="cntHorzAlign", lfmName="cnt-horz-align", hostName="CntHorzAlign", tipo="enum", values=GRID_HORZ_ALIGN_VALUES});
 __registerScreenSizeProp({luaName="cntGutter", lfmName="cnt-gutter", hostName="CntGutter", tipo="double"});
@@ -204,13 +207,23 @@ __registerScreenSizeProp({luaName="dynWidthTxt", lfmName="dyn-width-txt", hostNa
 __registerScreenSizeProp({luaName="dynHeightTxt", lfmName="dyn-height-txt", hostName="DynHeightTxt", tipo="bool"});
 __registerScreenSizeProp({luaName="dynWidthSingleLine", lfmName="dyn-width-single-line", hostName="DynWidthSingleLine", tipo="bool"});
 __registerScreenSizeProp({luaName="dynWidthEachLine", lfmName="dyn-width-each-line", hostName="DynWidthEachLine", tipo="bool"});
+__registerScreenSizeProp({luaName="postDynWidthTxt", lfmName="post-dyn-width-txt", hostName="PostDynWidthTxt", tipo="bool"});
+__registerScreenSizeProp({luaName="finalOffsetX", lfmName="final-offset-x", hostName="FinalOffsetX", tipo="double"});
+__registerScreenSizeProp({luaName="finalOffsetY", lfmName="final-offset-y", hostName="OffsetY", tipo="double"});
+__registerScreenSizeProp({luaName="vertTile", lfmName="vert-tile", hostName="VertTile", tipo="bool"});
+__registerScreenSizeProp({luaName="vertTileWeight", lfmName="vert-tile-weight", hostName="VertTileWeight", tipo="double"});
+__registerScreenSizeProp({luaName="horzTile", lfmName="horz-tile", hostName="HorzTile", tipo="bool"});
+__registerScreenSizeProp({luaName="minHeight", lfmName="min-height", hostName="MinHeight", tipo="double"});
+__registerScreenSizeProp({luaName="maxHeight", lfmName="max-height", hostName="MaxHeight", tipo="double"});
+__registerScreenSizeProp({luaName="maxWidth", lfmName="max-width", hostName="MaxWidth", tipo="double"});
 
 
 -- Grid Events
-
 __registerScreenSizeEvent({luaName="onPrepare", lfmName="on-prepare", hostName="OnPrepare", arguments="screenSize"});
+__registerScreenSizeEvent({luaName="onAligned", lfmName="on-aligned", hostName="OnAligned", arguments="screenSize, changedBounds, childChangedBounds"});
 __registerScreenSizeEvent({luaName="onGetWidth", lfmName="on-get-width", hostName="OnGetWidth", arguments="screenSize, width"});
 __registerScreenSizeEvent({luaName="onGetHeight", lfmName="on-get-height", hostName="OnGetHeight", arguments="screenSize, height"});
+__registerScreenSizeEvent({luaName="onGetVertMargins", lfmName="on-get-vert-margins", hostName="OnGetVertMargins", arguments="screenSize, height, top, bottom"});
 
 -- Instance
 
