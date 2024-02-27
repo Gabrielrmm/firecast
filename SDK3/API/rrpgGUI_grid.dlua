@@ -213,6 +213,7 @@ __registerScreenSizeProp({luaName="vertTileWeight", lfmName="vert-tile-weight", 
 __registerScreenSizeProp({luaName="horzTile", lfmName="horz-tile", hostName="HorzTile", tipo="bool"});
 __registerScreenSizeProp({luaName="minHeight", lfmName="min-height", hostName="MinHeight", tipo="double"});
 __registerScreenSizeProp({luaName="maxHeight", lfmName="max-height", hostName="MaxHeight", tipo="double"});
+__registerScreenSizeProp({luaName="minWidth", lfmName="min-width", hostName="MinWidth", tipo="double"});
 __registerScreenSizeProp({luaName="maxWidth", lfmName="max-width", hostName="MaxWidth", tipo="double"});
 
 __registerScreenSizeProp({luaName="dynWidthSingleLine", lfmName="dyn-width-single-line", hostName="DynWidthSingleLine", tipo="bool"});

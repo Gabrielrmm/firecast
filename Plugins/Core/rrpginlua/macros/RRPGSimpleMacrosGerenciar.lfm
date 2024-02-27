@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<popupForm name="frmGerenciarSimpleMacros" title="@@macros.ui.manageMacros" width="450" height="450" resizable="true">
+<popupForm name="frmGerenciarSimpleMacros" title="@@macros.ui.manageMacros" width="450" height="480" resizable="true">
 	<import file="../interfaceUtils.xml"/>
 
 	<!-- Popup de Edição da Macro -->
@@ -8,57 +8,58 @@
 			self.popEditMacro:setNodeObject(nil);
 		</event>
 		
-		<scrollBox align="client">
-			<layout align="top" height="25" padding="{left=2, right=2}">
-				<label text="@@macros.ui.editLabel" align="client" margins="{right=2}" horzTextAlign="center" fontSize="16"/>
-				<button text="@@macros.ui.closeButton" align="right" width="80" onClick="self.popEditMacro:close();"/>			
-			</layout>
-			
-			<horzLine align="top" margins="{top=4, bottom=2, left=16, right=16}" strokeColor="white"/>
-			
-			<flowLayout align="top" autoHeight="true" margins="{left=5,right=5, top=8}">
-				<label text="@@macros.ui.nameLabel" autoSize="true"/>
-				<label text="@@macros.ui.nameLabel.Orientation" autoSize="true" fontSize="12" fontColor="gray" wordWrap="false"/>
-				<flowLineBreak/>
-				
-				<flowPart minWidth="100" maxWidth="250" height="30" margins="{bottom=12, top=-2}">					
-					<edit name="edtNomeDaMacro" align="client" field="macro" textPrompt="@@macros.ui.macroName.example"/>
-				</flowPart>			
-				<flowLineBreak/>
-				
-				<radioButton groupName="tipoMacro" field="tipoMacro" fieldValue="S" text="@@macros.ui.macroType.simple"/>
-				<radioButton groupName="tipoMacro" field="tipoMacro" fieldValue="L" text="@@macros.ui.macroType.lua" margins="{bottom=12, right=8}"/>
-				<button text="??" width="45" onClick="GUI.openInBrowser('https://firecast.app/sdk3/RRPG%20SDK%203.html?Macros.html');"/>
-				<flowLineBreak/>
-				
-				<label text="@@macros.ui.actionsTitle" autoSize="true" vertTextAlign="trailing"/>
-				<label name="labExtraInfoAcoes" text="@@macros.ui.macroType.onePerLine" autoSize="true" fontSize="12" fontColor="gray" wordWrap="false" vertTextAlign="trailing"/>				
-				<flowLineBreak/>				
-				
-				<flowPart name="flpCode" minWidth="100" maxWidth="1200" height="100" margins="{bottom=12, top=-2}">					
-					<textEditor align="client" field="acoes" wordWrap="false"/>
-				</flowPart>			
+		<style>
+			.dynSize {
+				g-dyn-width-txt: true;
+				g-dyn-height-txt: true;
+			}
+		</style>
+		
+		<scrollBox align="client" g-cnt-gutter="16" g-cnt-line-spacing="4">	
+			<row g-cnt-min-grid-width="120" g-cnt-vert-align="center" g-margin-top="4">
+				<label g="col" text="@@macros.ui.editLabel" horzTextAlign="center" fontSize="16" g-width="12" g-dyn-height-txt="true"  />
+				<button g="block" text="@@macros.ui.closeButton" onClick="self.popEditMacro:close();"  class="dynSize"  g-min-width="80" />					
+			</row>
+					
+			<horzLine g="col" g-width="12" margins="{top=4, bottom=2}" strokeColor="white"/>		
 						
+			<row g-margin-top="8">
+				<label g="col" text="@@macros.ui.nameLabel" class="dynSize"/>
+				<label g="col" text="@@macros.ui.nameLabel.Orientation" fontSize="12" fontColor="gray" wordWrap="false" class="dynSize" g-break-line-before="true"/>	
 				
-				<flowLineBreak/>	
-				<button text="@@macros.ui.deleteMacro" width="150" margins="{top=8, right=15, bottom=15}" height="30">
-					<event name="OnClick">
-						Dialogs.confirmYesNo(lang("macros.ui.deleteConfirmation"),
-							function (confirmado)
-								if confirmado then
-									local node = self.popEditMacro:getNodeObject();								
-									self.popEditMacro:close();						
-									
-									if node ~= nil then
-										NDB.deleteNode(node);
-										globalMacrosInvalido = true;
-									end;
+				<edit g="col" name="edtNomeDaMacro" field="macro" textPrompt="@@macros.ui.macroName.example" g-margin-top="6"
+					  g-width="12" g-min-height="30" g-max-width="250" g-dyn-height-txt="true" g-break-line-before="true"/>				
+			</row>
+						
+			<row g-margin-top="4" g-vert-align="center" g-cnt-line-spacing="4">
+				<radioButton g="block" class="dynSize" groupName="tipoMacro" field="tipoMacro" fieldValue="S" text="@@macros.ui.macroType.simple"/>
+				<radioButton g="block" class="dynSize" groupName="tipoMacro" field="tipoMacro" fieldValue="L" text="@@macros.ui.macroType.lua" margins="{right=8}"/>
+				<button g="block" class="dynSize" text="???" width="45" onClick="GUI.openInBrowser('https://firecast.app/sdk3/RRPG%20SDK%203.html?Macros.html');"/>
+			</row>																	
+
+			<row g-vert-tile="true" g-min-height="160" g-vert-align="bottom" g-margin-top="4">
+				<label g="block" class="dynSize" text="@@macros.ui.actionsTitle" vertTextAlign="trailing"/>
+				<label g="block" class="dynSize" name="labExtraInfoAcoes" text="@@macros.ui.macroType.onePerLine" fontSize="12" fontColor="gray" wordWrap="false" vertTextAlign="trailing" g-gutter="0"/>				
+				
+				<textEditor g="col" g-width="12" field="acoes" wordWrap="false" g-vert-tile="true" g-break-line-before="true" g-break-line-after="true" g-margin-top="6"/>						
+			</row>
+			
+			<button g="block" g-margin-top="8" g-margin-bottom="4" class="dynSize" text="@@macros.ui.deleteMacro" g-min-width="100" g-min-height="30">
+				<event name="OnClick">
+					Dialogs.confirmYesNo(lang("macros.ui.deleteConfirmation"),
+						function (confirmado)
+							if confirmado then
+								local node = self.popEditMacro:getNodeObject();								
+								self.popEditMacro:close();						
+								
+								if node ~= nil then
+									NDB.deleteNode(node);
+									globalMacrosInvalido = true;
 								end;
-							end);
-					</event>
-				</button>
-				
-			</flowLayout>
+							end;
+						end);
+				</event>
+			</button>				
 		</scrollBox>
 		
 		<dataLink fields="{'macro', 'acoes'}" onChange="globalMacrosInvalido = true;"/>		
@@ -68,10 +69,6 @@
 			</event>
 		</dataLink>
 		<dataLink field="macro" onChange="self.popEditMacro:getNodeObject().macro = globalPrepareMacroName(self.popEditMacro:getNodeObject().macro);"/>
-		
-		<event name="OnResize">	
-			self.flpCode.height = self.popEditMacro.height - 220;
-		</event>
 		
 		<event name="onCalculateSize"><![CDATA[
 			local w = (self.width or 0) * 0.8;

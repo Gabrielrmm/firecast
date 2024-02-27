@@ -34,7 +34,18 @@ function gui.Control:endUpdate() _obj_invoke(self.handle, "EndUpdate"); end;
 function gui.Control:needRepaint() _obj_invoke(self.handle, "Repaint"); end;
 
 function gui.Control:getVisible() return _obj_getProp(self.handle, "Visible"); end;
-function gui.Control:setVisible(visible) _obj_setProp(self.handle, "Visible", visible == true) end;	
+
+function gui.Control:setVisible(visible) 
+	_obj_setProp(self.handle, "Visible", visible == true);
+	
+	if visible then
+		local grid = self:tryGetGrid();
+		
+		if grid ~= nil then
+			grid:invalidate();
+		end;
+	end;
+end;	
 
 function gui.Control:getAlign() return _obj_getProp(self.handle, "Align"); end;
 function gui.Control:setAlign(align) _obj_setProp(self.handle, "Align", align); end;	
@@ -146,6 +157,10 @@ function gui.Control:getGrid()
 	return cachedGrid;
 end;
 
+function gui.Control:tryGetGrid()
+	return rawget(self, "__cachedGrid");
+end;
+
 gui.Control.props["visible"] = {setter = "setVisible", getter = "getVisible", tipo = "bool"};
 gui.Control.props["align"] = {setter = "setAlign", getter = "getAlign", tipo = "enum", 
 							   values = {"none", "top", "left", "right",
@@ -232,6 +247,48 @@ function gui.newLayout()
 end;
 
 guiLoaders["layout"] = layoutFromHandle;
+
+--[[ Objeto Row ]]--
+
+gui.Row = gui.Layout.inherit();
+
+local function rowFromHandle(handle)
+	return gui.Row.fromHandle(handle);	
+end
+
+function gui.newRow()
+  return gui.fromHandle(_obj_newObject("row"));
+end;
+
+guiLoaders["row"] = rowFromHandle;
+
+--[[ Objeto Col ]]--
+
+gui.Col = gui.Layout.inherit();
+
+local function colFromHandle(handle)
+	return gui.Col.fromHandle(handle);
+end
+
+function gui.newCol()
+  return gui.fromHandle(_obj_newObject("col"));
+end;
+
+guiLoaders["col"] = colFromHandle;
+
+--[[ Objeto Container ]]--
+
+gui.Container = gui.Layout.inherit();
+
+local function containerFromHandle(handle)
+	return gui.Container.fromHandle(handle);
+end
+
+function gui.newContainer()
+  return gui.fromHandle(_obj_newObject("container"));
+end;
+
+guiLoaders["container"] = containerFromHandle;
 
 --[[ Objeto Form Layout ]]--
 
