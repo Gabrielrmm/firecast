@@ -205,8 +205,6 @@ __registerScreenSizeProp({luaName="marginRight", lfmName="margin-right", hostNam
 __registerScreenSizeProp({luaName="marginBottom", lfmName="margin-bottom", hostName="MarginBottom", tipo="double"});
 __registerScreenSizeProp({luaName="dynWidthTxt", lfmName="dyn-width-txt", hostName="DynWidthTxt", tipo="bool"});
 __registerScreenSizeProp({luaName="dynHeightTxt", lfmName="dyn-height-txt", hostName="DynHeightTxt", tipo="bool"});
-__registerScreenSizeProp({luaName="dynWidthSingleLine", lfmName="dyn-width-single-line", hostName="DynWidthSingleLine", tipo="bool"});
-__registerScreenSizeProp({luaName="dynWidthEachLine", lfmName="dyn-width-each-line", hostName="DynWidthEachLine", tipo="bool"});
 __registerScreenSizeProp({luaName="postDynWidthTxt", lfmName="post-dyn-width-txt", hostName="PostDynWidthTxt", tipo="bool"});
 __registerScreenSizeProp({luaName="finalOffsetX", lfmName="final-offset-x", hostName="FinalOffsetX", tipo="double"});
 __registerScreenSizeProp({luaName="finalOffsetY", lfmName="final-offset-y", hostName="OffsetY", tipo="double"});
@@ -216,6 +214,10 @@ __registerScreenSizeProp({luaName="horzTile", lfmName="horz-tile", hostName="Hor
 __registerScreenSizeProp({luaName="minHeight", lfmName="min-height", hostName="MinHeight", tipo="double"});
 __registerScreenSizeProp({luaName="maxHeight", lfmName="max-height", hostName="MaxHeight", tipo="double"});
 __registerScreenSizeProp({luaName="maxWidth", lfmName="max-width", hostName="MaxWidth", tipo="double"});
+
+__registerScreenSizeProp({luaName="dynWidthSingleLine", lfmName="dyn-width-single-line", hostName="DynWidthSingleLine", tipo="bool"});
+__registerScreenSizeProp({luaName="dynWidthEachLine", lfmName="dyn-width-each-line", hostName="DynWidthEachLine", tipo="bool"});
+__registerScreenSizeProp({luaName="dynWidthMatchHeight", lfmName="dyn-width-match-height", hostName="DynWidthMatchHeight", tipo="bool"});
 
 
 -- Grid Events
