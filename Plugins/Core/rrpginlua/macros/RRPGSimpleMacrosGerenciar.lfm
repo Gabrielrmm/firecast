@@ -2,49 +2,53 @@
 <popupForm name="frmGerenciarSimpleMacros" title="@@macros.ui.manageMacros" width="450" height="480" resizable="true">
 	<import file="../interfaceUtils.xml"/>
 
+	<style>
+		.dynSize {
+			g-dyn-width-txt: true;
+			g-dyn-height-txt: true;
+		}
+	</style>
+
 	<!-- Popup de Edição da Macro -->
 	<popup name="popEditMacro" autoScopeNode="false">
 		<event name="onClose">
 			self.popEditMacro:setNodeObject(nil);
-		</event>
+		</event>	
 		
-		<style>
-			.dynSize {
-				g-dyn-width-txt: true;
-				g-dyn-height-txt: true;
-			}
-		</style>
-		
-		<scrollBox align="client" g-cnt-gutter="16" g-cnt-line-spacing="4">	
-			<row g-cnt-min-grid-width="120" g-cnt-vert-align="center" g-margin-top="4">
-				<label g="col" text="@@macros.ui.editLabel" horzTextAlign="center" fontSize="16" g-width="12" g-dyn-height-txt="true"  />
-				<button g="block" text="@@macros.ui.closeButton" onClick="self.popEditMacro:close();"  class="dynSize"  g-min-width="80" />					
+		<scrollBox align="client" g-cnt-gutter="16" g-cnt-line-spacing="8" padding="{top=4, bottom=4, left=4}">	
+			<row g-cnt-min-grid-width="120" g-cnt-vert-align="center">
+				<label g="col" text="@@macros.ui.editLabel" horzTextAlign="center" fontSize="16" g-offset="2" g-width="10" g-dyn-height-txt="true"  />
+				<button g="block" text="@@macros.ui.closeButton" onClick="self.popEditMacro:close();" class="dynSize" g-min-width="80" />					
 			</row>
 					
 			<horzLine g="col" g-width="12" margins="{top=4, bottom=2}" strokeColor="white"/>		
 						
-			<row g-margin-top="8">
-				<label g="col" text="@@macros.ui.nameLabel" class="dynSize"/>
-				<label g="col" text="@@macros.ui.nameLabel.Orientation" fontSize="12" fontColor="gray" wordWrap="false" class="dynSize" g-break-line-before="true"/>	
+			<row g-margin-top="4">
+				<col g-width="12" g-cnt-gutter="0">
+					<label g="block" text="@@macros.ui.nameLabel" class="dynSize"/>
+					<label g="block" text="@@macros.ui.nameLabel.Orientation" fontSize="12" fontColor="gray" wordWrap="false" class="dynSize"/>	
+				</col>
 				
 				<edit g="col" name="edtNomeDaMacro" field="macro" textPrompt="@@macros.ui.macroName.example" g-margin-top="6"
-					  g-width="12" g-min-height="30" g-max-width="250" g-dyn-height-txt="true" g-break-line-before="true"/>				
+					  g-width="12" g-min-height="30" g-max-width="300" g-dyn-height-txt="true" g-break-line-before="true"/>				
 			</row>
 						
 			<row g-margin-top="4" g-vert-align="center" g-cnt-line-spacing="4">
 				<radioButton g="block" class="dynSize" groupName="tipoMacro" field="tipoMacro" fieldValue="S" text="@@macros.ui.macroType.simple"/>
 				<radioButton g="block" class="dynSize" groupName="tipoMacro" field="tipoMacro" fieldValue="L" text="@@macros.ui.macroType.lua" margins="{right=8}"/>
-				<button g="block" class="dynSize" text="???" width="45" onClick="GUI.openInBrowser('https://firecast.app/sdk3/RRPG%20SDK%203.html?Macros.html');"/>
+				<button g="block" class="dynSize" text="???" onClick="GUI.openInBrowser('https://firecast.app/sdk3/RRPG%20SDK%203.html?Macros.html');"/>
 			</row>																	
 
-			<row g-vert-tile="true" g-min-height="160" g-vert-align="bottom" g-margin-top="4">
-				<label g="block" class="dynSize" text="@@macros.ui.actionsTitle" vertTextAlign="trailing"/>
-				<label g="block" class="dynSize" name="labExtraInfoAcoes" text="@@macros.ui.macroType.onePerLine" fontSize="12" fontColor="gray" wordWrap="false" vertTextAlign="trailing" g-gutter="0"/>				
+			<row g-vert-tile="true" g-min-height="160" g-cnt-vert-align="bottom">
+				<col g-cnt-gutter="0" g-width="12">
+					<label g="block" class="dynSize" text="@@macros.ui.actionsTitle" vertTextAlign="trailing"/>
+					<label g="block" class="dynSize" name="labExtraInfoAcoes" text="@@macros.ui.macroType.onePerLine" fontSize="12" fontColor="gray" wordWrap="false" vertTextAlign="trailing"/>				
+				</col>
 				
-				<textEditor g="col" g-width="12" field="acoes" wordWrap="false" g-vert-tile="true" g-break-line-before="true" g-break-line-after="true" g-margin-top="6"/>						
+				<textEditor g="col" g-width="12" field="acoes" wordWrap="false" g-vert-tile="true" g-margin-top="6"/>						
 			</row>
 			
-			<button g="block" g-margin-top="8" g-margin-bottom="4" class="dynSize" text="@@macros.ui.deleteMacro" g-min-width="100" g-min-height="30">
+			<button g="block" g-margin-top="4" class="dynSize" text="@@macros.ui.deleteMacro" g-min-width="100" g-min-height="30">
 				<event name="OnClick">
 					Dialogs.confirmYesNo(lang("macros.ui.deleteConfirmation"),
 						function (confirmado)
@@ -112,19 +116,12 @@
 	<!-- Tabs da janela -->	
 	<tabControl align="client">
 		<tab title="@@macros.ui.title.macrosForEveryoneOnRoom" name="tabMacroMesa">
-			<dataScopeBox name="dsbMacrosMesaGlobal" align="client">
-				<layout align="client" margins="{left=2, top=2, right=2, bottom=2}">
-						<layout align="top" height="25" margins="{left=2, right=2, bottom=8}">
-							<label name="labTitMesa2" text="@@macros.ui.room" align="client" horzTextAlign="center" fontSize="16" fontStyle="bold"/>										
-						</layout>					
+			<dataScopeBox name="dsbMacrosMesaGlobal" align="client" padding="{top=60, bottom=2}" g-cnt-gutter="16">				
+				<label g="col" g-width="12" g-dyn-height-txt="true" name="labTitMesa2" text="@@macros.ui.room" horzTextAlign="center" fontSize="16" fontStyle="bold"/>										
 				
-					<layout align="top" height="28" margins="{bottom=5, top=5, left=5}">
-						<button text="@@macros.ui.roomMacro.newTitle" align="left" width="150" onClick="self.editarMacroNode(self.rclMacrosDaMesaGlobal:append());"/>
-					</layout>
-					
-					<recordList name="rclMacrosDaMesaGlobal" align="client" field="macros" 
-								templateForm="frmGerenciarSimpleMacrosItem" selectable="true"/>
-				</layout>
+				<button g="col" class="dynSize" g-margin-top="16" g-min-height="30" text="@@macros.ui.roomMacro.newTitle" wordWrap="true" onClick="self.editarMacroNode(self.rclMacrosDaMesaGlobal:append());"/>
+						
+				<recordList g="col" g-width="12" g-margin-top="4" g-vert-tile="true" name="rclMacrosDaMesaGlobal" field="macros" templateForm="frmGerenciarSimpleMacrosItem" selectable="true"/>
 			</dataScopeBox>
 		</tab>
 	
@@ -166,7 +163,7 @@
 	</tabControl>	
 	
 	<event name="onShow">	
-    globalNeedSimpleMacrosNDB();
+		globalNeedSimpleMacrosNDB();
 	
 		if globalSimpleMacrosNDB.global == nil then
 			globalSimpleMacrosNDB.global = {};

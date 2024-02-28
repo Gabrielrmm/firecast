@@ -34,11 +34,11 @@ function __registerScreenSizePropFor_specificScreenSize(screenSize, details, out
 		else
 			Grid.props[details.luaName .. "-" .. screenSize] = propDetais;
 		end;	
-	else
-		Grid.props[details.luaName] = propDetais;
-		
+	else			
 		if details.lfmName ~= nil then
 			Grid.props[details.lfmName] = propDetais;
+		else
+			Grid.props[details.luaName] = propDetais;
 		end;
 	end;
 end;
@@ -125,11 +125,11 @@ local function __registerScreenSizeEvent_specificScreenSize(screenSize, details,
 			setterWithScreenSizeArgument(instance, screenSize, value);			
 		end;	
 
-	if screenSize == nil then
-		Grid.eves[details.luaName] = eve;
-		
+	if screenSize == nil then			
 		if details.lfmName ~= nil then
 			Grid.eves[details.lfmName] = eve;
+		else
+			Grid.eves[details.luaName] = eve;
 		end;
 	else					
 		if details.lfmName ~= nil then

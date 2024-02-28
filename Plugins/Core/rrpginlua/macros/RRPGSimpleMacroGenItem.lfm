@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<form name="frmGerenciarSimpleMacrosItem" title="Gerenciar Plugins" height="30" margins="{left=4, right=4, top=1, bottom=1}">
+<form name="frmGerenciarSimpleMacrosItem" title="Gerenciar Plugins" height="30" margins="{top=1, bottom=1}">
 	<import file="../interfaceUtils.xml"/>
 	
 	
@@ -14,10 +14,9 @@
 		]]>
 	</script>
 	
-	<layout align="client" margins="{top=2, left=2}">
-		<label name="labMacro" align="client" text="(Macro Vazia)"/>
-		<button name="btnEdit" align="right" text="Editar..." margins="{left=4, right=4, top=1, bottom=1}" 
-				width="75" onClick="editarMacro();"/>
+	<layout align="client" margins="{top=2, left=2}" g-cnt-vert-align="center" g-cnt-gutter="4">
+		<label g="col" g-width="12" name="labMacro" text="(Macro Vazia)"/>		
+		<button g="block" g-dyn-width-txt="true" g-dyn-height-txt="true" name="btnEdit" text="@@macros.ui.editButton" onClick="editarMacro();" g-min-width="75" padding="{left=10, right=10}"/>
 	</layout>
 	
 	<horzLine align="bottom" margins="{top=2}"/>
@@ -30,6 +29,5 @@
 	
 	<script>
 		self.labMacro.text = "(" .. lang("macros.ui.emptyMacro") ..")";
-		self.btnEdit.text = lang("macros.ui.editButton");
 	</script>
 </form>
