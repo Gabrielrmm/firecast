@@ -30,7 +30,7 @@
 				</col>
 				
 				<edit g="col" name="edtNomeDaMacro" field="macro" textPrompt="@@macros.ui.macroName.example" g-margin-top="6"
-					  g-width="12" g-min-height="30" g-max-width="300" g-dyn-height-txt="true" g-break-line-before="true"/>				
+					  g-width="12" g-min-height="30" g-max-width="400" g-dyn-height-txt="true" g-break-line-before="true"/>				
 			</row>
 						
 			<row g-margin-top="4" g-vert-align="center" g-cnt-line-spacing="4">
@@ -114,46 +114,27 @@
 		
 		
 	<!-- Tabs da janela -->	
-	<tabControl align="client">
+	<tabControl align="client" g-cnt-gutter="16">
 		<tab title="@@macros.ui.title.macrosForEveryoneOnRoom" name="tabMacroMesa">
-			<dataScopeBox name="dsbMacrosMesaGlobal" align="client" padding="{top=60, bottom=2}" g-cnt-gutter="16">				
-				<label g="col" g-width="12" g-dyn-height-txt="true" name="labTitMesa2" text="@@macros.ui.room" horzTextAlign="center" fontSize="16" fontStyle="bold"/>										
-				
-				<button g="col" class="dynSize" g-margin-top="16" g-min-height="30" text="@@macros.ui.roomMacro.newTitle" wordWrap="true" onClick="self.editarMacroNode(self.rclMacrosDaMesaGlobal:append());"/>
-						
+			<dataScopeBox name="dsbMacrosMesaGlobal" align="client" padding="{top=4, bottom=2}">				
+				<label g="col" g-width="12" g-dyn-height-txt="true" name="labTitMesa2" text="@@macros.ui.room" horzTextAlign="center" fontSize="16" fontStyle="bold"/>														
+				<button g="col" class="dynSize" g-margin-top="12" g-min-height="30" text="@@macros.ui.roomMacro.newTitle" wordWrap="true" onClick="self.editarMacroNode(self.rclMacrosDaMesaGlobal:append());"/>						
 				<recordList g="col" g-width="12" g-margin-top="4" g-vert-tile="true" name="rclMacrosDaMesaGlobal" field="macros" templateForm="frmGerenciarSimpleMacrosItem" selectable="true"/>
 			</dataScopeBox>
 		</tab>
 	
 		<tab title="@@macros.ui.myMacros.title">
 			<tabControl align="client">
-				<tab title="@@macros.ui.myMacros.global.title">
-					<layout align="client" margins="{left=2, top=2, right=2, bottom=2}">
-						<layout align="top" height="28" margins="{bottom=5, top=5, left=5}">
-							<button text="@@macros.ui.myMacros.global.new.title" align="left" width="150" onClick="self.editarMacroNode(self.rclMacrosGlobais:append());"/>
-						</layout>
-						
-						<recordList name="rclMacrosGlobais" align="client" field="macros" 
-									templateForm="frmGerenciarSimpleMacrosItem" selectable="true"/>
-					</layout>
+				<tab name="tabMyGlobal" title="@@macros.ui.myMacros.global.title" padding="{top=8, bottom=2}">
+					<button g="col" class="dynSize" g-min-height="30" text="@@macros.ui.myMacros.global.new.title" wordWrap="true" onClick="self.editarMacroNode(self.rclMacrosGlobais:append());"/>		
+					<recordList g="col" g-width="12" g-margin-top="4" g-vert-tile="true" name="rclMacrosGlobais" field="macros" templateForm="frmGerenciarSimpleMacrosItem" selectable="true"/>				
 				</tab>
 				
 				<tab name="tabMacrosDaMesa" title="@@macros.ui.myMacros.thisroom.title">
-					<dataScopeBox name="dsbMacrosDaMesa" align="client">
-						<layout align="client" margins="{left=2, top=2, right=2, bottom=2}">
-							<layout align="top" height="25" margins="{left=2, right=2, bottom=8}">
-								<label name="labTitMesa" text="@@macros.ui.room" align="client" horzTextAlign="center" fontSize="16" fontStyle="bold"/>			
-								
-							</layout>				
-								
-						
-							<layout align="top" height="28" margins="{bottom=3}">
-								<button text="@@macros.ui.myMacros.thisroom.new.title" align="left" width="180" onClick="self.editarMacroNode(self.rclMacrosDaMesa:append());"/>
-							</layout>
-							
-							<recordList name="rclMacrosDaMesa" align="client" field="macros" 
-										templateForm="frmGerenciarSimpleMacrosItem" selectable="true"/>
-						</layout>				
+					<dataScopeBox name="dsbMacrosDaMesa" align="client" padding="{top=8, bottom=2}">
+						<label g="col" g-width="12" g-dyn-height-txt="true" name="labTitMesa" text="@@macros.ui.room" horzTextAlign="center" fontSize="16" fontStyle="bold"/>	
+						<button g="col" class="dynSize" g-margin-top="12" g-min-height="30" text="@@macros.ui.myMacros.thisroom.new.title" wordWrap="true" onClick="self.editarMacroNode(self.rclMacrosDaMesa:append());"/>
+						<recordList g="col" g-width="12" g-margin-top="4" g-vert-tile="true" name="rclMacrosDaMesa" field="macros" templateForm="frmGerenciarSimpleMacrosItem" selectable="true"/>												
 					</dataScopeBox>
 				</tab>
 			</tabControl>
@@ -183,7 +164,7 @@
 			end;	
 			
 			self.dsbMacrosDaMesa.node = globalSimpleMacrosNDB.mesas[self._mesa.codigoInterno];
-			self.labTitMesa.text = "Mesa: " .. self._mesa.nome;
+			self.labTitMesa.text = lang("macros.ui.room") .. ": " .. self._mesa.nome;
 			self.labTitMesa2.text = self.labTitMesa.text;
 			
 			local opcoes = {};

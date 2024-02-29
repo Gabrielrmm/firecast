@@ -15,7 +15,7 @@
 	</script>
 	
 	<layout align="client" margins="{top=2, left=2}" g-cnt-vert-align="center" g-cnt-gutter="4">
-		<label g="col" g-width="12" name="labMacro" text="(Macro Vazia)"/>		
+		<label g="col" g-width="12" name="labMacro"/>
 		<button g="block" g-dyn-width-txt="true" g-dyn-height-txt="true" name="btnEdit" text="@@macros.ui.editButton" onClick="editarMacro();" g-min-width="75" padding="{left=10, right=10}"/>
 	</layout>
 	
